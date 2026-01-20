@@ -77,6 +77,7 @@ export class BlogsController {
     @Param('blogId') blogId: string,
     @ConnectedUser() user: userSchema.UserDocument,
   ) {
+    console.log(blogId);
     return this.blogsService.removeBlogById(blogId, user.id);
   }
 }

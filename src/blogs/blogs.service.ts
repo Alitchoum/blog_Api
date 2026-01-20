@@ -55,7 +55,7 @@ export class BlogsService {
       .findOneAndUpdate({ _id: blogId, user: userId }, updateData, {
         new: true,
       })
-      .orFail(new ForbiddenException('Blog not found or Unauthorized access'))
+      .orFail(new ForbiddenException('Blog not found or unauthorized access'))
       .populate('user')
       .exec();
     return BlogDto.toBlogDto(blog);
@@ -64,17 +64,7 @@ export class BlogsService {
   async removeBlogById(blogId: string, userId: string) {
     await this.blogModel
       .findOneAndDelete({ _id: blogId, user: userId })
-      .orFail(new ForbiddenException('Blog not found or Unauthorized access'))
+      .orFail(new ForbiddenException('Blog not found or unauthorized access'))
       .exec();
   }
-
-  // toBlogDto(blog: BlogDocument): BlogDto {
-  //   return {
-  //     id: blog.id,
-  //     title: blog.title,
-  //     description: blog.description,
-  //     image: blog.image,
-  //     user: UserDto.toUserDto(SafePopulated(blog.user)),
-  //   };
-  // }
 }

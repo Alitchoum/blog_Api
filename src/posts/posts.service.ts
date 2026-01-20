@@ -2,15 +2,15 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
-  Post,
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { PostDocument } from './post.schema';
+import { Post, PostDocument } from './post.schema';
 import { PostDto } from './dto/post.dto';
 import { BlogsService } from '../blogs/blogs.service';
+import { BlogDto } from '../blogs/dto/blog.dto';
 
 @Injectable()
 export class PostsService {
@@ -32,23 +32,60 @@ export class PostsService {
       blog: dto.blogId,
       user: userId,
     });
-    const post = await createdPost.populate(['user', 'blog']);
+    const post = await this.postModel
+      .findById(createdPost._id)
+      .populate('user') // user du post
+      .populate({ path: 'blog', populate: { path: 'user' } }) //Charge blog et son user associé (objet)
+      .exec();
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
     return PostDto.toPostDto(post);
   }
 
-  findAll() {
-    return `This action returns all posts`;
+  async findAllPosts(): Promise<PostDto[]> {
+    const posts = await this.postModel
+      .find()
+      .populate('user')
+      .populate({ path: 'blog', populate: { path: 'user' } })
+      .orFail(new NotFoundException('No found posts'))
+      .exec();
+    return posts.map((post) => PostDto.toPostDto(post));
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
+  async findByPostId(postId: string) {
+    const post = await this.postModel
+      .findById(postId)
+      .populate('user')
+      .populate({ path: 'blog', populate: { path: 'user' } })
+      .orFail(new NotFoundException('Post not found'))
+      .exec();
+    return PostDto.toPostDto(post);
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async updatePost(
+    postId: string,
+    userId: string,
+    updateData: UpdatePostDto,
+  ): Promise<PostDto> {
+    const updatedPost = await this.postModel
+      .findOneAndUpdate({ _id: postId, user: userId }, updateData, {
+        new: true,
+      })
+      .orFail(new NotFoundException('Post not found'))
+      .populate('user')
+      .populate({ path: 'blog', populate: { path: 'user' } })
+      .exec();
+    return PostDto.toPostDto(updatedPost);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  async removePost(postId: string, userId: string) {
+    return await this.postModel
+      .findOneAndDelete({
+        _id: postId,
+        user: userId,
+      })
+      .orFail(new NotFoundException('Post not found'))
+      .exec();
   }
 }

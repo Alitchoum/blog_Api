@@ -1,11 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MaxLength,
-} from 'class-validator';
 import { BlogDto } from '../../blogs/dto/blog.dto';
 import { UserDto } from '../../users/dto/user.dto';
 import { PostDocument } from '../post.schema';
@@ -15,22 +8,13 @@ export class PostDto {
   @ApiProperty()
   id: string;
   @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
   title: string;
   @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(1000)
   content: string;
+  @ApiProperty({ type: [String] })
+  images: string[] | null;
   @ApiProperty()
-  @IsOptional()
-  @IsArray()
-  images?: string[];
-  @ApiProperty()
-  @IsOptional()
-  @IsArray()
-  tags?: string[];
+  tags: string[] | null;
   @ApiProperty()
   blog: BlogDto;
   @ApiProperty()

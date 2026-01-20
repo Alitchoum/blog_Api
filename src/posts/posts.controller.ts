@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -13,14 +15,16 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import {
   ApiBody,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { Protect } from '../auth/protect.decorator';
 import { ConnectedUser } from '../users/connected-user.decorator';
 import * as userSchema from '../users/user.schema';
+import { PostDto } from './dto/post.dto';
 
-@ApiTags('  Post')
+@ApiTags('Post')
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
@@ -28,7 +32,10 @@ export class PostsController {
   @Protect()
   @Post()
   @ApiBody({ type: CreatePostDto })
-  @ApiCreatedResponse() // a ajouter ou non ici ?
+  @ApiCreatedResponse({
+    type: PostDto,
+    description: 'Post created with successfully',
+  })
   @ApiOperation({ summary: 'Create a new post' })
   createPost(
     @Body() dto: CreatePostDto,
@@ -37,23 +44,43 @@ export class PostsController {
     return this.postsService.createPost(dto, user.id);
   }
 
+  @Protect()
   @Get()
-  findAll() {
-    return this.postsService.findAll();
+  @ApiOkResponse({ type: PostDto })
+  @ApiOperation({ summary: 'Get all posts' })
+  findAllPosts() {
+    return this.postsService.findAllPosts();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postsService.findOne(+id);
+  @Protect()
+  @Get(':postId')
+  @ApiOkResponse({ type: PostDto })
+  @ApiOperation({ summary: 'Get post by id' })
+  findPostById(@Param('postId') postId: string) {
+    return this.postsService.findByPostId(postId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(+id, updatePostDto);
+  @Protect()
+  @Patch(':postId')
+  @ApiOperation({ summary: 'Update user post by id' })
+  @ApiBody({ type: UpdatePostDto })
+  @ApiOkResponse({ type: PostDto })
+  updatePost(
+    @Param('postId') postId: string,
+    @ConnectedUser() user: userSchema.UserDocument,
+    @Body() updateData: UpdatePostDto,
+  ) {
+    return this.postsService.updatePost(postId, user.id, updateData);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postsService.remove(+id);
+  @Protect()
+  @Delete(':postId')
+  @ApiOperation({ summary: 'Delete user post by id' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removePost(
+    @Param('postId') postId: string,
+    @ConnectedUser() user: userSchema.UserDocument,
+  ) {
+    return this.postsService.removePost(postId, user.id);
   }
 }

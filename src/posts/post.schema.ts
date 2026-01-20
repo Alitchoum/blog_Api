@@ -1,4 +1,4 @@
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Blog, BlogDocument } from '../blogs/blog.schema';
 import { User, UserDocument } from '../users/user.schema';
@@ -11,14 +11,14 @@ export class Post {
   title: string;
   @Prop({ required: true })
   content: string;
-  @Prop()
-  images?: string[];
-  @Prop()
-  tags?: string[];
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Blog.name })
-  blog: mongoose.Types.ObjectId | BlogDocument;
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
-  user: mongoose.Types.ObjectId | UserDocument;
+  @Prop({ type: [String], default: null })
+  images: string[] | null;
+  @Prop({ type: [String], default: null })
+  tags: string[] | null;
+  @Prop({ type: Types.ObjectId, ref: Blog.name })
+  blog: Types.ObjectId | BlogDocument;
+  @Prop({ type: Types.ObjectId, ref: User.name })
+  user: Types.ObjectId | UserDocument;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);
