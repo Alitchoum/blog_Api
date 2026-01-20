@@ -10,16 +10,31 @@ import {
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Protect } from '../auth/protect.decorator';
+import { ConnectedUser } from '../users/connected-user.decorator';
+import * as userSchema from '../users/user.schema';
 
 @ApiTags('  Post')
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
+  @Protect()
   @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postsService.create(createPostDto);
+  @ApiBody({ type: CreatePostDto })
+  @ApiCreatedResponse() // a ajouter ou non ici ?
+  @ApiOperation({ summary: 'Create a new post' })
+  createPost(
+    @Body() dto: CreatePostDto,
+    @ConnectedUser() user: userSchema.UserDocument,
+  ) {
+    return this.postsService.createPost(dto, user.id);
   }
 
   @Get()

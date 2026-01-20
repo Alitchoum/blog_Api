@@ -1,6 +1,7 @@
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Blog } from '../blogs/blog.schema';
+import { Blog, BlogDocument } from '../blogs/blog.schema';
+import { User, UserDocument } from '../users/user.schema';
 
 export type PostDocument = HydratedDocument<Post>;
 
@@ -10,10 +11,14 @@ export class Post {
   title: string;
   @Prop({ required: true })
   content: string;
-  @Prop({ required: true })
-  image?: string;
+  @Prop()
+  images?: string[];
+  @Prop()
+  tags?: string[];
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Blog.name })
-  blogId: mongoose.Types.ObjectId;
+  blog: mongoose.Types.ObjectId | BlogDocument;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
+  user: mongoose.Types.ObjectId | UserDocument;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

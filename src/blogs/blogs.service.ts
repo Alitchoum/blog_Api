@@ -9,12 +9,12 @@ import { BlogDto } from './dto/blog.dto';
 import { Blog, BlogDocument } from './blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { UserDto } from '../users/dto/user.dto';
-import { SafePopulated } from '../_utils/is-populated.function';
 
 @Injectable()
 export class BlogsService {
-  constructor(@InjectModel(Blog.name) private blogModel: Model<BlogDocument>) {}
+  constructor(
+    @InjectModel(Blog.name) private readonly blogModel: Model<BlogDocument>,
+  ) {}
 
   async createBlog(dto: CreateBlogDto, userId: string): Promise<BlogDto> {
     const createBlog = await this.blogModel.create({
@@ -24,7 +24,7 @@ export class BlogsService {
       user: userId,
     });
     const blog = await createBlog.populate('user');
-    return this.toBlogDto(blog);
+    return BlogDto.toBlogDto(blog);
   }
 
   async findAllBlogs(): Promise<BlogDto[]> {
@@ -34,7 +34,7 @@ export class BlogsService {
       .orFail(new NotFoundException('no blogs found'))
       .exec();
 
-    return blogs.map((blog) => this.toBlogDto(blog));
+    return blogs.map((blog) => BlogDto.toBlogDto(blog));
   }
 
   async findBlogById(blogId: string) {
@@ -43,7 +43,7 @@ export class BlogsService {
       .populate('user')
       .orFail(new NotFoundException('blog does not exist'))
       .exec();
-    return this.toBlogDto(blog);
+    return BlogDto.toBlogDto(blog);
   }
 
   async updateBlogById(
@@ -52,29 +52,29 @@ export class BlogsService {
     updateData: UpdateBlogDto,
   ): Promise<BlogDto> {
     const blog = await this.blogModel
-      .findOneAndUpdate({ blogId, userId }, updateData, { new: true })
-      .orFail(new ForbiddenException('blog does not exist'))
+      .findOneAndUpdate({ _id: blogId, user: userId }, updateData, {
+        new: true,
+      })
+      .orFail(new ForbiddenException('Blog not found or Unauthorized access'))
       .populate('user')
       .exec();
-    return this.toBlogDto(blog);
+    return BlogDto.toBlogDto(blog);
   }
 
   async removeBlogById(blogId: string, userId: string) {
-    const blog = await this.blogModel
-      .findByIdAndDelete(blogId)
-      .orFail(new ForbiddenException('blog not found'))
-      .populate('user')
+    await this.blogModel
+      .findOneAndDelete({ _id: blogId, user: userId })
+      .orFail(new ForbiddenException('Blog not found or Unauthorized access'))
       .exec();
-    return await this.blogModel.findByIdAndDelete(blog).exec();
   }
 
-  toBlogDto(blog: BlogDocument): BlogDto {
-    return {
-      id: blog.id,
-      title: blog.title,
-      description: blog.description,
-      image: blog.image,
-      user: UserDto.toUserDto(SafePopulated(blog.user)),
-    };
-  }
+  // toBlogDto(blog: BlogDocument): BlogDto {
+  //   return {
+  //     id: blog.id,
+  //     title: blog.title,
+  //     description: blog.description,
+  //     image: blog.image,
+  //     user: UserDto.toUserDto(SafePopulated(blog.user)),
+  //   };
+  // }
 }
