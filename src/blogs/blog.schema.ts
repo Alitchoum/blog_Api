@@ -10,7 +10,7 @@ export class Blog {
   title: string;
   @Prop({ required: true })
   description: string;
-  @Prop({ required: true })
+  @Prop()
   image?: string;
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
   user: mongoose.Types.ObjectId | UserDocument;

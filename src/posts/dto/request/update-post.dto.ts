@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsNotEmpty,
@@ -6,27 +6,31 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
+import { Optional } from 'class-validator-extended';
 
 export class UpdatePostDto {
   @ApiProperty({ type: String })
+  @Optional()
   @IsNotEmpty()
-  @IsOptional()
   @IsString()
-  title?: string | null;
+  title?: string;
+
   @ApiProperty({ type: String })
+  @Optional()
   @IsNotEmpty()
-  @IsOptional()
   @IsString()
   @MaxLength(1000)
-  content?: string | null;
-  @ApiProperty({ type: [String] })
+  content?: string;
+
+  @ApiPropertyOptional({ type: [String], nullable: true })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   images?: string[] | null;
-  @ApiProperty()
+
+  @ApiPropertyOptional({ type: [String], nullable: true })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  tags?: string[]; //| null;
+  tags?: string[] | null;
 }

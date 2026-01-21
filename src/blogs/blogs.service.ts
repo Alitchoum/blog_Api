@@ -9,22 +9,24 @@ import { BlogDto } from './dto/blog.dto';
 import { Blog, BlogDocument } from './blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { BlogMapper } from './blog-mapper';
 
 @Injectable()
 export class BlogsService {
   constructor(
     @InjectModel(Blog.name) private readonly blogModel: Model<BlogDocument>,
+    private readonly blogMapper: BlogMapper,
   ) {}
 
   async createBlog(dto: CreateBlogDto, userId: string): Promise<BlogDto> {
     const createBlog = await this.blogModel.create({
       title: dto.title,
       description: dto.description,
-      image: dto.image,
+      image: dto.image ?? undefined,
       user: userId,
     });
     const blog = await createBlog.populate('user');
-    return BlogDto.toBlogDto(blog);
+    return this.blogMapper.toBlogDto(blog);
   }
 
   async findAllBlogs(): Promise<BlogDto[]> {
@@ -34,7 +36,7 @@ export class BlogsService {
       .orFail(new NotFoundException('no blogs found'))
       .exec();
 
-    return blogs.map((blog) => BlogDto.toBlogDto(blog));
+    return blogs.map((blog) => this.blogMapper.toBlogDto(blog));
   }
 
   async findBlogById(blogId: string) {
@@ -43,7 +45,7 @@ export class BlogsService {
       .populate('user')
       .orFail(new NotFoundException('blog does not exist'))
       .exec();
-    return BlogDto.toBlogDto(blog);
+    return this.blogMapper.toBlogDto(blog);
   }
 
   async updateBlogById(
@@ -58,7 +60,7 @@ export class BlogsService {
       .orFail(new ForbiddenException('Blog not found or unauthorized access'))
       .populate('user')
       .exec();
-    return BlogDto.toBlogDto(blog);
+    return this.blogMapper.toBlogDto(blog);
   }
 
   async removeBlogById(blogId: string, userId: string) {

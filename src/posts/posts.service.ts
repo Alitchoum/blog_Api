@@ -3,23 +3,24 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import { CreatePostDto } from './dto/request/create-post.dto';
+import { UpdatePostDto } from './dto/request/update-post.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post, PostDocument } from './post.schema';
-import { PostDto } from './dto/post.dto';
+import { GetPostDto } from './dto/response/get-post.dto';
 import { BlogsService } from '../blogs/blogs.service';
-import { BlogDto } from '../blogs/dto/blog.dto';
+import { PostMapper } from './post.mapper';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
     private readonly blogsService: BlogsService,
+    private readonly postMapper: PostMapper,
   ) {}
 
-  async createPost(dto: CreatePostDto, userId: string): Promise<PostDto> {
+  async createPost(dto: CreatePostDto, userId: string): Promise<GetPostDto> {
     const blog = await this.blogsService.findBlogById(dto.blogId);
     if (blog.user.id !== userId) {
       throw new ForbiddenException('Unauthorized access');
@@ -34,23 +35,22 @@ export class PostsService {
     });
     const post = await this.postModel
       .findById(createdPost._id)
-      .populate('user') // user du post
-      .populate({ path: 'blog', populate: { path: 'user' } }) //Charge blog et son user associé (objet)
+      .populate(['user', 'blog'])
+      //.populate({ path: 'blog', populate: { path: 'user' } }) //Charge blog et son user associé (objet)
       .exec();
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-    return PostDto.toPostDto(post);
+    return this.postMapper.toPostDto(post);
   }
 
-  async findAllPosts(): Promise<PostDto[]> {
+  async findAllPosts(): Promise<GetPostDto[]> {
     const posts = await this.postModel
       .find()
-      .populate('user')
-      .populate({ path: 'blog', populate: { path: 'user' } })
+      .populate(['user', 'blog'])
       .orFail(new NotFoundException('No found posts'))
       .exec();
-    return posts.map((post) => PostDto.toPostDto(post));
+    return posts.map((post) => this.postMapper.toPostDto(post));
   }
 
   async findByPostId(postId: string) {
@@ -60,23 +60,27 @@ export class PostsService {
       .populate({ path: 'blog', populate: { path: 'user' } })
       .orFail(new NotFoundException('Post not found'))
       .exec();
-    return PostDto.toPostDto(post);
+    return this.postMapper.toPostDto(post);
   }
 
   async updatePost(
     postId: string,
     userId: string,
     updateData: UpdatePostDto,
-  ): Promise<PostDto> {
+  ): Promise<GetPostDto> {
     const updatedPost = await this.postModel
-      .findOneAndUpdate({ _id: postId, user: userId }, updateData, {
-        new: true,
-      })
+      .findOneAndUpdate(
+        { _id: postId, user: userId },
+        { $set: updateData },
+        {
+          new: true,
+        },
+      )
       .orFail(new NotFoundException('Post not found'))
       .populate('user')
       .populate({ path: 'blog', populate: { path: 'user' } })
       .exec();
-    return PostDto.toPostDto(updatedPost);
+    return this.postMapper.toPostDto(updatedPost);
   }
 
   async removePost(postId: string, userId: string) {

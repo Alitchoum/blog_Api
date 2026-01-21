@@ -10,8 +10,8 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import { CreatePostDto } from './dto/request/create-post.dto';
+import { UpdatePostDto } from './dto/request/update-post.dto';
 import {
   ApiBody,
   ApiCreatedResponse,
@@ -22,7 +22,7 @@ import {
 import { Protect } from '../auth/protect.decorator';
 import { ConnectedUser } from '../users/connected-user.decorator';
 import * as userSchema from '../users/user.schema';
-import { PostDto } from './dto/post.dto';
+import { GetPostDto } from './dto/response/get-post.dto';
 
 @ApiTags('Post')
 @Controller('posts')
@@ -33,7 +33,7 @@ export class PostsController {
   @Post()
   @ApiBody({ type: CreatePostDto })
   @ApiCreatedResponse({
-    type: PostDto,
+    type: GetPostDto,
     description: 'Post created with successfully',
   })
   @ApiOperation({ summary: 'Create a new post' })
@@ -46,7 +46,7 @@ export class PostsController {
 
   @Protect()
   @Get()
-  @ApiOkResponse({ type: PostDto })
+  @ApiOkResponse({ type: GetPostDto })
   @ApiOperation({ summary: 'Get all posts' })
   findAllPosts() {
     return this.postsService.findAllPosts();
@@ -54,7 +54,7 @@ export class PostsController {
 
   @Protect()
   @Get(':postId')
-  @ApiOkResponse({ type: PostDto })
+  @ApiOkResponse({ type: GetPostDto })
   @ApiOperation({ summary: 'Get post by id' })
   findPostById(@Param('postId') postId: string) {
     return this.postsService.findByPostId(postId);
@@ -64,7 +64,7 @@ export class PostsController {
   @Patch(':postId')
   @ApiOperation({ summary: 'Update user post by id' })
   @ApiBody({ type: UpdatePostDto })
-  @ApiOkResponse({ type: PostDto })
+  @ApiOkResponse({ type: GetPostDto })
   updatePost(
     @Param('postId') postId: string,
     @ConnectedUser() user: userSchema.UserDocument,

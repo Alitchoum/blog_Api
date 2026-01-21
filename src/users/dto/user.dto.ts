@@ -1,25 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty } from 'class-validator';
-import { UserDocument } from '../user.schema';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class UserDto {
-  @ApiProperty()
+  @ApiProperty({ required: true, type: String })
   @IsNotEmpty()
+  @IsString()
   id: string;
-  @ApiProperty()
+
+  @ApiProperty({ required: true, type: String })
   @IsNotEmpty()
+  @IsString()
   name: string;
-  @ApiProperty()
+
+  @ApiProperty({ required: true, type: String })
   @IsNotEmpty()
   @IsEmail()
   email: string;
-
-  //FUNCTION TO OBJECT USER -> DTO
-  static toUserDto(user: UserDocument): UserDto {
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    };
-  }
 }

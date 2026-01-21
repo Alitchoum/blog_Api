@@ -21,19 +21,22 @@ import {
 import { Protect } from '../auth/protect.decorator';
 import { ConnectedUser } from './connected-user.decorator';
 import * as userSchema from './user.schema';
+import { UserMapper } from './user-mapper';
 
 @ApiTags('User')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly userMapper: UserMapper,
+  ) {}
 
   //GET USER PROFIL (TOKEN)
   @Protect()
   @Get('profile')
   @ApiOperation({ summary: 'Load protected profile' })
   getProfile(@ConnectedUser() user: userSchema.UserDocument): UserDto {
-    console.log(user);
-    return UserDto.toUserDto(user);
+    return this.userMapper.toUserDto(user);
   }
 
   //GET ALL USERS

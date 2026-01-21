@@ -3,20 +3,23 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDto } from './dto/user.dto';
 import { UsersRepository } from './users.repository';
 import * as bcrypt from 'bcrypt';
-import { UserDocument } from './user.schema';
+import { UserMapper } from './user-mapper';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(
+    private readonly usersRepository: UsersRepository,
+    private readonly userMapper: UserMapper,
+  ) {}
 
   async findAllUser(): Promise<UserDto[]> {
     const users = await this.usersRepository.findAllUsers();
-    return users.map((user) => this.toUserDto(user));
+    return users.map((user) => this.userMapper.toUserDto(user));
   }
 
   async findUserById(userId: string): Promise<UserDto> {
     const user = await this.usersRepository.findUserById(userId);
-    return this.toUserDto(user);
+    return this.userMapper.toUserDto(user);
   }
 
   async updateUser(
@@ -31,19 +34,10 @@ export class UsersService {
       userId,
       updateData,
     );
-    return this.toUserDto(updatedUser);
+    return this.userMapper.toUserDto(updatedUser);
   }
 
   async deleteUser(userId: string) {
     return await this.usersRepository.deleteUser(userId);
-  }
-
-  //FUNCTION TO OBJECT USER -> DTO
-  toUserDto(user: UserDocument): UserDto {
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    };
   }
 }

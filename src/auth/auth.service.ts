@@ -9,13 +9,15 @@ import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { RegisterDto } from './dto/register.dto';
 import { UsersService } from '../users/users.service';
+import { UserMapper } from '../users/user-mapper';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userRepository: UsersRepository,
-    private usersService: UsersService,
-    private jwtService: JwtService,
+    private readonly userRepository: UsersRepository,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly userMapper: UserMapper,
   ) {}
 
   //REGISTER
@@ -27,7 +29,7 @@ export class AuthService {
       email: dto.email,
       password: hashed,
     });
-    return this.usersService.toUserDto(user);
+    return this.userMapper.toUserDto(user);
   }
 
   //LOGIN

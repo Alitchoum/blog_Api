@@ -1,4 +1,4 @@
-import mongoose, { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Blog, BlogDocument } from '../blogs/blog.schema';
 import { User, UserDocument } from '../users/user.schema';

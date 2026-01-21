@@ -1,34 +1,31 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { UserDto } from '../../users/dto/user.dto';
-import { BlogDocument } from '../blog.schema';
-import { SafePopulated } from '../../_utils/is-populated.function';
+import { Nullable, Optional } from 'class-validator-extended';
 
 export class BlogDto {
-  @ApiProperty()
+  @ApiProperty({ required: true, type: String })
+  @IsNotEmpty()
+  @IsString()
   id: string;
-  @ApiProperty()
+
+  @ApiProperty({ required: true, type: String })
   @IsNotEmpty()
   @IsString()
   title: string;
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  description?: string;
-  @ApiProperty()
-  @ApiPropertyOptional()
-  @IsOptional()
-  image?: string;
-  @ApiProperty()
-  user: UserDto;
 
-  static toBlogDto(blog: BlogDocument): BlogDto {
-    return {
-      id: blog.id,
-      title: blog.title,
-      description: blog.description,
-      image: blog.image,
-      user: UserDto.toUserDto(SafePopulated(blog.user)),
-    };
-  }
+  @ApiProperty({ required: true, type: String })
+  @IsNotEmpty()
+  @IsString()
+  description: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  @Optional()
+  @Nullable()
+  @IsString()
+  image?: string | null;
+
+  @ApiProperty({ type: UserDto })
+  @IsNotEmpty()
+  user: UserDto;
 }

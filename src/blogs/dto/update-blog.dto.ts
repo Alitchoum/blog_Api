@@ -1,20 +1,24 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateBlogDto } from './create-blog.dto';
-import { IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { Optional } from 'class-validator-extended';
 
 export class UpdateBlogDto extends PartialType(CreateBlogDto) {
-  @ApiProperty()
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty({ type: String })
+  @Optional()
+  @IsNotEmpty()
   @IsString()
-  title: string;
-  @ApiProperty()
-  @ApiPropertyOptional()
-  @IsOptional()
+  title?: string;
+
+  @ApiProperty({ type: String })
+  @Optional()
+  @IsNotEmpty()
   @IsString()
-  description: string;
-  @ApiProperty()
-  @ApiPropertyOptional()
-  @IsOptional()
+  @MaxLength(255)
+  description?: string;
+
+  @ApiProperty({ type: String })
+  @Optional()
+  @IsString()
   image?: string;
 }
