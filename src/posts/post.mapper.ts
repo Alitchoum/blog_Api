@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PostDocument } from './post.schema';
-import { SafePopulated } from '../_utils/is-populated.function';
+import { SafePopulated } from '../_utils/functions/is-populated.function';
 import { GetPostDto } from './dto/response/get-post.dto';
 import { UserMapper } from '../users/user.mapper';
 import { BlogMapper } from '../blogs/blog.mapper';

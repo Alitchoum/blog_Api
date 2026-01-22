@@ -5,21 +5,45 @@ import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UploadModule } from './upload/upload.module';
+import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
+import { EnvironmentVariables, validateEnv } from './_utils/config/env.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      validate: validateEnv,
       isGlobal: true,
     }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (
+        configService: ConfigService<EnvironmentVariables, true>,
+      ) => ({
+        uri: configService.get('MONGODB_URL'),
+      }),
+    }),
+    NestjsFormDataModule.configAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        storage: MemoryStoredFile,
+        limits: {
+          files: configService.get('UPLOAD_MAX_FILES'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
+    // NestjsFormDataModule.config({ storage: MemoryStoredFile }),
     UsersModule,
     BlogsModule,
     PostsModule,
     CommentsModule,
-    MongooseModule.forRoot('mongodb://localhost/nest'),
     AuthModule,
     UploadModule,
   ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

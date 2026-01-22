@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BlogDocument } from './blog.schema';
 import { GetBlogDto } from './dto/response/get-blog.dto';
 import { UserMapper } from '../users/user.mapper';
-import { SafePopulated } from '../_utils/is-populated.function';
+import { SafePopulated } from '../_utils/functions/is-populated.function';
 import { BlogLigthDto } from './dto/response/blog-ligth.dto';
 
 @Injectable()

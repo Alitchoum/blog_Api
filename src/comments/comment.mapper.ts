@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CommentDocument } from './comments.schema';
 import { GetCommentDto } from './dto/response/get-comment.dto';
 import { UserMapper } from '../users/user.mapper';
-import { SafePopulated } from '../_utils/is-populated.function';
+import { SafePopulated } from '../_utils/functions/is-populated.function';
 import { PostMapper } from '../posts/post.mapper';
 
 @Injectable()

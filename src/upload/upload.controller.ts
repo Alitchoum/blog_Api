@@ -1,31 +1,14 @@
-import {
-  Controller,
-  FileTypeValidator,
-  MaxFileSizeValidator,
-  ParseFilePipe,
-  Post,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FormDataRequest } from 'nestjs-form-data';
+import { FormDataDto } from './form-data.dto';
 
-@ApiTags('Upload')
-@Controller('upload')
+@ApiTags('Upload Image')
+@Controller()
 export class UploadController {
-  @Post('image')
-  @UseInterceptors(FileInterceptor('file'))
-  uploadFile(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1000 }),
-          new FileTypeValidator({ fileType: 'image/jpeg' }),
-        ],
-      }),
-    )
-    file: Express.Multer.File,
-  ) {
-    console.log(file);
+  @Post('load')
+  @FormDataRequest()
+  getHello(@Body() dto: FormDataDto): void {
+    console.log(dto);
   }
 }
