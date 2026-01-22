@@ -9,8 +9,8 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserDto } from './dto/user.dto';
+import { UpdateUserDto } from './dto/request/update-user.dto';
+import { GetUserDto } from './dto/response/get-user.dto';
 import {
   ApiAcceptedResponse,
   ApiBody,
@@ -21,7 +21,7 @@ import {
 import { Protect } from '../auth/protect.decorator';
 import { ConnectedUser } from './connected-user.decorator';
 import * as userSchema from './user.schema';
-import { UserMapper } from './user-mapper';
+import { UserMapper } from './user.mapper';
 
 @ApiTags('User')
 @Controller('users')
@@ -35,7 +35,7 @@ export class UsersController {
   @Protect()
   @Get('profile')
   @ApiOperation({ summary: 'Load protected profile' })
-  getProfile(@ConnectedUser() user: userSchema.UserDocument): UserDto {
+  getProfile(@ConnectedUser() user: userSchema.UserDocument): GetUserDto {
     return this.userMapper.toUserDto(user);
   }
 
@@ -43,8 +43,11 @@ export class UsersController {
   @Protect()
   @Get()
   @ApiOperation({ summary: 'Get all users' })
-  @ApiOkResponse({ type: UserDto, description: 'Get all users successfully' })
-  findAllUser(): Promise<UserDto[]> {
+  @ApiOkResponse({
+    type: GetUserDto,
+    description: 'Get all users successfully',
+  })
+  findAllUser(): Promise<GetUserDto[]> {
     return this.usersService.findAllUser();
   }
 
@@ -52,7 +55,7 @@ export class UsersController {
   @Protect()
   @Get(':userId')
   @ApiOperation({ summary: 'Get user by id' })
-  @ApiOkResponse({ type: UserDto })
+  @ApiOkResponse({ type: GetUserDto })
   findUserById(@Param('userId') userId: string) {
     return this.usersService.findUserById(userId);
   }
@@ -62,7 +65,7 @@ export class UsersController {
   @Patch(':userId')
   @ApiOperation({ summary: 'Update user by id' })
   @ApiBody({ type: UpdateUserDto })
-  @ApiOkResponse({ type: UserDto })
+  @ApiOkResponse({ type: GetUserDto })
   updateUser(
     @Param('userId') userId: string,
     @Body() updateData: UpdateUserDto,

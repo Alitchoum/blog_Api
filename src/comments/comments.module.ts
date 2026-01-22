@@ -5,7 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Comment, CommentSchema } from './comments.schema';
 import { UsersModule } from '../users/users.module';
 import { AuthModule } from '../auth/auth.module';
-import { CommentMapper } from './comment-mapper';
+import { CommentMapper } from './comment.mapper';
 import { PostsModule } from '../posts/posts.module';
 
 @Module({

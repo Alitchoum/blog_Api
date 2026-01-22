@@ -36,11 +36,8 @@ export class PostsService {
     const post = await this.postModel
       .findById(createdPost._id)
       .populate(['user', 'blog'])
-      //.populate({ path: 'blog', populate: { path: 'user' } }) //Charge blog et son user associé (objet)
+      .orFail(new NotFoundException('Post not found'))
       .exec();
-    if (!post) {
-      throw new NotFoundException('Post not found');
-    }
     return this.postMapper.toPostDto(post);
   }
 
@@ -56,8 +53,7 @@ export class PostsService {
   async findByPostId(postId: string) {
     const post = await this.postModel
       .findById(postId)
-      .populate('user')
-      .populate({ path: 'blog', populate: { path: 'user' } })
+      .populate(['user', 'blog'])
       .orFail(new NotFoundException('Post not found'))
       .exec();
     return this.postMapper.toPostDto(post);

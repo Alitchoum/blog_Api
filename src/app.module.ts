@@ -6,6 +6,7 @@ import { CommentsModule } from './comments/comments.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ConfigModule } from '@nestjs/config';
     CommentsModule,
     MongooseModule.forRoot('mongodb://localhost/nest'),
     AuthModule,
+    UploadModule,
   ],
 })
 export class AppModule {}

@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
-import { Optional } from 'class-validator-extended';
+import { Nullable, Optional } from 'class-validator-extended';
+import { GetUserLightDto } from '../../../users/dto/response/get-user-light.dto';
 
-export class BlogLigthDto {
+export class GetBlogDto {
   @ApiProperty({ required: true, type: String })
   @IsNotEmpty()
   @IsString()
@@ -14,11 +15,17 @@ export class BlogLigthDto {
   title: string;
 
   @ApiProperty({ required: true, type: String })
+  @IsNotEmpty()
   @IsString()
   description: string;
 
-  @ApiProperty({ type: String })
+  @ApiProperty({ type: String, nullable: true })
   @Optional()
+  @Nullable()
   @IsString()
-  image?: string;
+  image?: string | null;
+
+  @ApiProperty({ type: GetUserLightDto })
+  @IsNotEmpty()
+  user: GetUserLightDto;
 }

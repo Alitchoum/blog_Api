@@ -3,13 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateBlogDto } from './dto/create-blog.dto';
-import { UpdateBlogDto } from './dto/update-blog.dto';
-import { BlogDto } from './dto/blog.dto';
+import { CreateBlogDto } from './dto/request/create-blog.dto';
+import { UpdateBlogDto } from './dto/request/update-blog.dto';
+import { GetBlogDto } from './dto/response/get-blog.dto';
 import { Blog, BlogDocument } from './blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { BlogMapper } from './blog-mapper';
+import { BlogMapper } from './blog.mapper';
 
 @Injectable()
 export class BlogsService {
@@ -18,7 +18,7 @@ export class BlogsService {
     private readonly blogMapper: BlogMapper,
   ) {}
 
-  async createBlog(dto: CreateBlogDto, userId: string): Promise<BlogDto> {
+  async createBlog(dto: CreateBlogDto, userId: string): Promise<GetBlogDto> {
     const createBlog = await this.blogModel.create({
       title: dto.title,
       description: dto.description,
@@ -29,7 +29,7 @@ export class BlogsService {
     return this.blogMapper.toBlogDto(blog);
   }
 
-  async findAllBlogs(): Promise<BlogDto[]> {
+  async findAllBlogs(): Promise<GetBlogDto[]> {
     const blogs = await this.blogModel
       .find()
       .populate('user')
@@ -52,7 +52,7 @@ export class BlogsService {
     blogId: string,
     userId: string,
     updateData: UpdateBlogDto,
-  ): Promise<BlogDto> {
+  ): Promise<GetBlogDto> {
     const blog = await this.blogModel
       .findOneAndUpdate({ _id: blogId, user: userId }, updateData, {
         new: true,

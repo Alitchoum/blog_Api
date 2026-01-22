@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateCommentDto } from './dto/create-comment.dto';
+import { CreateCommentDto } from './dto/request/create-comment.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CommentDto } from './dto/comment.dto';
+import { GetCommentDto } from './dto/response/get-comment.dto';
 import { Comment, CommentDocument } from './comments.schema';
-import { CommentMapper } from './comment-mapper';
+import { CommentMapper } from './comment.mapper';
+import { UpdateCommentDto } from './dto/request/update-comment.dto';
 
 @Injectable()
 export class CommentsService {
@@ -16,7 +17,7 @@ export class CommentsService {
   async createComment(
     dto: CreateCommentDto,
     userID: string,
-  ): Promise<CommentDto> {
+  ): Promise<GetCommentDto> {
     const createdComment = await this.commentModel.create({
       content: dto.content,
       user: userID,
@@ -26,19 +27,46 @@ export class CommentsService {
     return this.commentMapper.toCommentDto(comment);
   }
 
-  // findAll() {
-  //   return `This action returns all comments`;
-  // }
-  //
-  // findOne(id: number) {
-  //   return `This action returns a #${id} comment`;
-  // }
-  //
-  // update(id: number, updateCommentDto: UpdateCommentDto) {
-  //   return `This action updates a #${id} comment`;
-  // }
-  //
-  // remove(id: number) {
-  //   return `This action removes a #${id} comment`;
-  // }
+  async findAllComments(): Promise<GetCommentDto[]> {
+    const comments = await this.commentModel
+      .find()
+      .populate(['user', 'post'])
+      .orFail(new NotFoundException('Comments not found'))
+      .exec();
+    return comments.map((comment) => this.commentMapper.toCommentDto(comment));
+  }
+
+  async findCommentById(commentId: string) {
+    const comment = await this.commentModel
+      .findById(commentId)
+      .populate(['user', 'post'])
+      .orFail(new NotFoundException('Comment not found'))
+      .exec();
+    return this.commentMapper.toCommentDto(comment);
+  }
+
+  async updateComment(
+    commentId: string,
+    userId: string,
+    updateData: UpdateCommentDto,
+  ): Promise<GetCommentDto> {
+    const updatedComment = await this.commentModel
+      .findOneAndUpdate(
+        { _id: commentId, user: userId },
+        { $set: updateData },
+        { new: true },
+      )
+      .populate(['user', 'post'])
+      .orFail(new NotFoundException('Comment not found'))
+      .exec();
+
+    return this.commentMapper.toCommentDto(updatedComment);
+  }
+
+  async removeComment(commentId: string, userID: string) {
+    return await this.commentModel
+      .findOneAndDelete({ _id: commentId, user: userID })
+      .orFail(new NotFoundException('Post not found'))
+      .exec();
+  }
 }

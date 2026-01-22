@@ -6,10 +6,10 @@ import {
 import { UsersRepository } from '../users/users.repository';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from '../users/dto/create-user.dto';
+import { CreateUserDto } from '../users/dto/request/create-user.dto';
 import { RegisterDto } from './dto/register.dto';
 import { UsersService } from '../users/users.service';
-import { UserMapper } from '../users/user-mapper';
+import { UserMapper } from '../users/user.mapper';
 
 @Injectable()
 export class AuthService {

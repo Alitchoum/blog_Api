@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
-import { UserDto } from '../../users/dto/user.dto';
-import { GetPostDto } from '../../posts/dto/response/get-post.dto';
+import { GetUserDto } from '../../../users/dto/response/get-user.dto';
+import { PostLightDto } from '../../../posts/dto/response/get-post-light.dto';
+import { GetUserLightDto } from '../../../users/dto/response/get-user-light.dto';
 
-export class CommentDto {
+export class GetCommentDto {
   @ApiProperty({ required: true, type: String })
   @IsNotEmpty()
   @IsString()
@@ -18,13 +19,13 @@ export class CommentDto {
   @ApiProperty({ type: Date })
   createdAt: Date;
 
-  @ApiProperty({ type: GetPostDto })
+  @ApiProperty({ type: PostLightDto })
   @IsNotEmpty()
   @IsString()
-  post: GetPostDto;
+  post: PostLightDto;
 
-  @ApiProperty({ type: UserDto })
+  @ApiProperty({ type: GetUserLightDto })
   @IsNotEmpty()
   @IsString()
-  user: UserDto;
+  user: GetUserLightDto;
 }

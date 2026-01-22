@@ -10,15 +10,15 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { BlogsService } from './blogs.service';
-import { CreateBlogDto } from './dto/create-blog.dto';
-import { UpdateBlogDto } from './dto/update-blog.dto';
+import { CreateBlogDto } from './dto/request/create-blog.dto';
+import { UpdateBlogDto } from './dto/request/update-blog.dto';
 import {
   ApiAcceptedResponse,
   ApiBody,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { BlogDto } from './dto/blog.dto';
+import { GetBlogDto } from './dto/response/get-blog.dto';
 import { Protect } from '../auth/protect.decorator';
 import { ConnectedUser } from '../users/connected-user.decorator';
 import * as userSchema from '../users/user.schema';
@@ -32,7 +32,7 @@ export class BlogsController {
   @Protect()
   @ApiOperation({ summary: 'Create user blog' })
   @ApiBody({ type: CreateBlogDto })
-  @ApiAcceptedResponse({ type: BlogDto })
+  @ApiAcceptedResponse({ type: GetBlogDto })
   createBlog(
     @Body() dto: CreateBlogDto,
     @ConnectedUser() user: userSchema.UserDocument,
@@ -43,22 +43,22 @@ export class BlogsController {
   @Protect()
   @Get()
   @ApiOperation({ summary: 'Get all blogs' })
-  @ApiAcceptedResponse({ type: BlogDto })
-  findAllBlogs(): Promise<BlogDto[] | null> {
+  @ApiAcceptedResponse({ type: GetBlogDto })
+  findAllBlogs(): Promise<GetBlogDto[] | null> {
     return this.blogsService.findAllBlogs();
   }
 
   @Get(':blogId')
   @ApiOperation({ summary: 'Get blog by id' })
-  @ApiAcceptedResponse({ type: BlogDto })
-  findBlogById(@Param('blogId') blogId: string): Promise<BlogDto> {
+  @ApiAcceptedResponse({ type: GetBlogDto })
+  findBlogById(@Param('blogId') blogId: string): Promise<GetBlogDto> {
     return this.blogsService.findBlogById(blogId);
   }
 
   @Protect()
   @Patch(':blogId')
   @ApiOperation({ summary: 'Update user blog (ref:id)' })
-  @ApiAcceptedResponse({ type: BlogDto })
+  @ApiAcceptedResponse({ type: GetBlogDto })
   @ApiBody({ type: UpdateBlogDto })
   updateBlogById(
     @Param('blogId') blogId: string,
