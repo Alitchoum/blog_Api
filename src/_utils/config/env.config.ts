@@ -21,6 +21,9 @@ export class EnvironmentVariables {
 
   @IsNumber()
   UPLOAD_MAX_FILES: number;
+
+  @IsNumber()
+  UPLOAD_MAX_FILES_SIZE_MB: number;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

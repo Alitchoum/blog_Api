@@ -9,13 +9,13 @@ import {
 import { Optional } from 'class-validator-extended';
 
 export class UpdatePostDto {
-  @ApiProperty({ type: String })
+  @ApiPropertyOptional({ type: String })
   @Optional()
   @IsNotEmpty()
   @IsString()
   title?: string;
 
-  @ApiProperty({ type: String })
+  @ApiPropertyOptional({ type: String })
   @Optional()
   @IsNotEmpty()
   @IsString()

@@ -16,6 +16,7 @@ import { EnvironmentVariables, validateEnv } from './_utils/config/env.config';
       validate: validateEnv,
       isGlobal: true,
     }),
+
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -25,17 +26,21 @@ import { EnvironmentVariables, validateEnv } from './_utils/config/env.config';
         uri: configService.get('MONGODB_URL'),
       }),
     }),
+
     NestjsFormDataModule.configAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        storage: MemoryStoredFile,
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        storage: MemoryStoredFile, //petits fichiers (legers)
+        isGlobal: true,
+        cleanupAfterSuccessHandle: true,
+        cleanupAfterFailedHandle: true,
         limits: {
           files: configService.get('UPLOAD_MAX_FILES'),
+          fileSize: configService.get('UPLOAD_MAX_FILES_SIZE_MB') * 1024 * 1024,
         },
       }),
-      inject: [ConfigService],
     }),
-    // NestjsFormDataModule.config({ storage: MemoryStoredFile }),
     UsersModule,
     BlogsModule,
     PostsModule,

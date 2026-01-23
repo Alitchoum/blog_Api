@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 import { Optional } from 'class-validator-extended';
 
@@ -14,13 +14,13 @@ export class CreatePostDto {
   @MaxLength(1000)
   content: string;
 
-  @ApiProperty({ type: [String] })
+  @ApiPropertyOptional({ type: String })
   @Optional()
   @IsArray()
   @IsString({ each: true })
   images?: string[];
 
-  @ApiProperty({ type: [String] })
+  @ApiPropertyOptional({ type: String })
   @Optional()
   @IsArray()
   @IsString({ each: true })

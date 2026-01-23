@@ -4,10 +4,12 @@ import {
   MaxFileSize,
   MemoryStoredFile,
 } from 'nestjs-form-data';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class FormDataDto {
+export class UploadImageDto {
+  @ApiProperty({ required: true, type: String, format: 'binary' })
   @IsFile()
-  @MaxFileSize(1e6)
+  @MaxFileSize(2 * 1024 * 1024)
   @HasMimeType(['image/jpeg', 'image/png'])
   image: MemoryStoredFile;
 }

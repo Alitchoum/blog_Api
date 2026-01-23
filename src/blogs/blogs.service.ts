@@ -10,6 +10,7 @@ import { Blog, BlogDocument } from './blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { BlogMapper } from './blog.mapper';
+import { unlink } from 'node:fs/promises';
 
 @Injectable()
 export class BlogsService {
@@ -64,9 +65,18 @@ export class BlogsService {
   }
 
   async removeBlogById(blogId: string, userId: string) {
-    await this.blogModel
-      .findOneAndDelete({ _id: blogId, user: userId })
-      .orFail(new ForbiddenException('Blog not found or unauthorized access'))
+    const blog = await this.blogModel
+      .findOne({ _id: blogId, user: userId })
+      .orFail(new NotFoundException('Blog not found'))
       .exec();
+
+    if (blog.image) {
+      try {
+        await unlink(blog.image.slice(1));
+      } catch {
+        console.log('Image not found');
+      }
+    }
+    await blog.deleteOne();
   }
 }

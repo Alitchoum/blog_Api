@@ -3,7 +3,7 @@ import { BlogDocument } from './blog.schema';
 import { GetBlogDto } from './dto/response/get-blog.dto';
 import { UserMapper } from '../users/user.mapper';
 import { SafePopulated } from '../_utils/functions/is-populated.function';
-import { BlogLigthDto } from './dto/response/blog-ligth.dto';
+import { GetBlogLigthDto } from './dto/response/get-blog-ligth.dto';
 
 @Injectable()
 export class BlogMapper {
@@ -19,7 +19,7 @@ export class BlogMapper {
     };
   }
 
-  toBlogLigthDto(blog: BlogDocument): BlogLigthDto {
+  toBlogLigthDto(blog: BlogDocument): GetBlogLigthDto {
     return {
       id: blog._id.toString(),
       title: blog.title,

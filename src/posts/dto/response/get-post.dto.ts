@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { BlogLigthDto } from '../../../blogs/dto/response/blog-ligth.dto';
+import { GetBlogLigthDto } from '../../../blogs/dto/response/get-blog-ligth.dto';
 import { Nullable } from 'class-validator-extended';
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 import { GetUserLightDto } from '../../../users/dto/response/get-user-light.dto';
@@ -32,8 +32,8 @@ export class GetPostDto {
   @IsString({ each: true })
   tags: string[] | null;
 
-  @ApiProperty({ required: true, type: BlogLigthDto })
-  blog: BlogLigthDto;
+  @ApiProperty({ required: true, type: GetBlogLigthDto })
+  blog: GetBlogLigthDto;
 
   @ApiProperty({ required: true, type: GetUserLightDto })
   user: GetUserLightDto;

@@ -36,6 +36,7 @@
     "class-validator-extended": "^4.2.1",
     "mongoose": "^9.1.3",
     "nestjs-form-data": "^1.9.93",
+    "nestjs-paginate": "^12.8.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.1"

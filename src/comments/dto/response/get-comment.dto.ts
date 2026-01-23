@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
-import { GetUserDto } from '../../../users/dto/response/get-user.dto';
 import { PostLightDto } from '../../../posts/dto/response/get-post-light.dto';
 import { GetUserLightDto } from '../../../users/dto/response/get-user-light.dto';
 

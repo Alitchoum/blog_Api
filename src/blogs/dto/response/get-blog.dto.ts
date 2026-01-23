@@ -1,6 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
-import { Nullable, Optional } from 'class-validator-extended';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { GetUserLightDto } from '../../../users/dto/response/get-user-light.dto';
 
 export class GetBlogDto {
@@ -19,9 +18,8 @@ export class GetBlogDto {
   @IsString()
   description: string;
 
-  @ApiProperty({ type: String, nullable: true })
-  @Optional()
-  @Nullable()
+  @ApiPropertyOptional({ type: String, nullable: true })
+  @IsOptional()
   @IsString()
   image?: string | null;
 
