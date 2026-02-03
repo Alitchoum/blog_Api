@@ -6,9 +6,9 @@ import { CommentsModule } from './comments/comments.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UploadModule } from './upload/upload.module';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { EnvironmentVariables, validateEnv } from './_utils/config/env.config';
+import { MinioClientModule } from './minio-client/minio-client.module';
 
 @Module({
   imports: [
@@ -46,9 +46,7 @@ import { EnvironmentVariables, validateEnv } from './_utils/config/env.config';
     PostsModule,
     CommentsModule,
     AuthModule,
-    UploadModule,
+    MinioClientModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}

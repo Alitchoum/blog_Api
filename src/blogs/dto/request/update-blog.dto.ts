@@ -1,7 +1,13 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { CreateBlogDto } from './create-blog.dto';
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import { Optional } from 'class-validator-extended';
+import {
+  HasMimeType,
+  IsFile,
+  MaxFileSize,
+  MemoryStoredFile,
+} from 'nestjs-form-data';
 
 export class UpdateBlogDto extends PartialType(CreateBlogDto) {
   @ApiProperty({ type: String })
@@ -17,8 +23,10 @@ export class UpdateBlogDto extends PartialType(CreateBlogDto) {
   @MaxLength(255)
   description?: string;
 
-  @ApiProperty({ type: String })
+  @ApiPropertyOptional({ type: 'string', format: 'binary' }) // Pour Swagger
   @Optional()
-  @IsString()
-  image?: string;
+  @IsFile()
+  @MaxFileSize(5 * 1024 * 1024)
+  @HasMimeType(['image/jpeg', 'image/png', 'image/webp'])
+  image?: MemoryStoredFile;
 }

@@ -7,10 +7,14 @@ import { BlogsModule } from '../blogs/blogs.module';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
 import { PostMapper } from './post.mapper';
+import { Comment, CommentSchema } from '../comments/comments.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
+    MongooseModule.forFeature([
+      { name: Post.name, schema: PostSchema },
+      { name: Comment.name, schema: CommentSchema },
+    ]),
     BlogsModule,
     UsersModule,
     AuthModule,

@@ -11,19 +11,32 @@ export class EnvironmentVariables {
   JWT_SECRET: string;
 
   @IsString()
-  JWT_EXPIRATION: string;
+  JWT_EXPIRATION: string = '7d';
 
   @IsString()
   MONGODB_URL: string;
 
-  @IsBoolean()
-  SMTP_PREVIEW: boolean = false;
+  @IsNumber()
+  UPLOAD_MAX_FILES: number = 1;
 
   @IsNumber()
-  UPLOAD_MAX_FILES: number;
+  UPLOAD_MAX_FILES_SIZE_MB: number = 5;
+
+  // MinIO
+  @IsString()
+  MINIO_ENDPOINT: string;
 
   @IsNumber()
-  UPLOAD_MAX_FILES_SIZE_MB: number;
+  MINIO_PORT: number;
+
+  @IsString()
+  MINIO_USER: string;
+
+  @IsString()
+  MINIO_PASSWORD: string;
+
+  @IsString()
+  MINIO_BUCKET: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

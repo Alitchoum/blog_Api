@@ -19,7 +19,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Protect } from '../auth/protect.decorator';
+import { Protect } from '../auth/decorators/protect.decorator';
 import { ConnectedUser } from '../users/connected-user.decorator';
 import * as UserSchema from '../users/user.schema';
 import { GetCommentDto } from './dto/response/get-comment.dto';

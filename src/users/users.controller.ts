@@ -18,7 +18,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Protect } from '../auth/protect.decorator';
+import { Protect } from '../auth/decorators/protect.decorator';
 import { ConnectedUser } from './connected-user.decorator';
 import * as userSchema from './user.schema';
 import { UserMapper } from './user.mapper';

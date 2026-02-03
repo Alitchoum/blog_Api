@@ -15,4 +15,5 @@ export class Comment {
   @Prop({ type: Types.ObjectId, ref: Post.name })
   post: Types.ObjectId | PostDocument;
 }
+
 export const CommentSchema = SchemaFactory.createForClass(Comment);

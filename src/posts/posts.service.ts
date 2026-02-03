@@ -11,11 +11,13 @@ import { Post, PostDocument } from './post.schema';
 import { GetPostDto } from './dto/response/get-post.dto';
 import { BlogsService } from '../blogs/blogs.service';
 import { PostMapper } from './post.mapper';
+import { Comment, CommentDocument } from '../comments/comments.schema';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
+    @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
     private readonly blogsService: BlogsService,
     private readonly postMapper: PostMapper,
   ) {}
@@ -80,12 +82,19 @@ export class PostsService {
   }
 
   async removePost(postId: string, userId: string) {
-    return await this.postModel
-      .findOneAndDelete({
+    const post = await this.postModel
+      .findOne({
         _id: postId,
         user: userId,
       })
       .orFail(new NotFoundException('Post not found'))
       .exec();
+    if (post.images) {
+      //add ici methode suppression image uploadService
+    }
+    //supprimer tous les commentaires associés au post (autres users)
+    await this.commentModel.deleteMany({ post: postId });
+    //supprimer le post
+    await this.postModel.deleteOne({ _id: postId });
   }
 }
