@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { NotFoundException } from '@nestjs/common';
 import { CreateCommentDto } from './dto/request/create-comment.dto';
+import { GetCommentDto } from './dto/response/get-comment.dto';
 
 export class CommentsRepository {
   constructor(
@@ -23,6 +24,14 @@ export class CommentsRepository {
       .findById(newComment._id)
       .orFail(new NotFoundException('Comment not found'))
       .populate(['user', 'post'])
+      .exec();
+  }
+
+  async findAllComments(): Promise<CommentDocument[]> {
+    return await this.commentModel
+      .find()
+      .populate(['user', 'post'])
+      .orFail(new NotFoundException('Comments not found'))
       .exec();
   }
 }

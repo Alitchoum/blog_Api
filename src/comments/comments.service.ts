@@ -29,11 +29,7 @@ export class CommentsService {
   }
 
   async findAllComments(): Promise<GetCommentDto[]> {
-    const comments = await this.commentModel
-      .find()
-      .populate(['user', 'post'])
-      .orFail(new NotFoundException('Comments not found'))
-      .exec();
+    const comments = await this.commentsRepository.findAllComments();
     return comments.map((comment) => this.commentMapper.toCommentDto(comment));
   }
 

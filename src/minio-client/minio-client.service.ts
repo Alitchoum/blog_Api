@@ -23,6 +23,7 @@ export class MinioClientService {
     this.setBucketPolicy();
   }
 
+  //Rendre public toutes les images de l'API
   private async setBucketPolicy() {
     const policy = {
       Version: '2012-10-17',
@@ -53,12 +54,12 @@ export class MinioClientService {
       image.buffer,
       image.size,
       {
-        'Content-Type': image.mimetype || 'application/octet-stream',
+        'Content-Type': image || 'application/octet-stream',
       },
     );
   }
 
-  //Rendre public avec une date expiration
+  //Rendre public avec expiration
   async getPresignedUrl(key: string): Promise<string> {
     return await this.minioClient.presignedGetObject(
       this.bucketName,

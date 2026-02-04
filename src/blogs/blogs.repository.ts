@@ -74,13 +74,11 @@ export class BlogsRepository {
     const posts = await this.postModel.find({ blog: blogId });
     const postIds = posts.map((post) => post._id.toString());
 
-    console.log('IDs des posts :', postIds);
     await Promise.all([
       this.commentModel.deleteMany({ post: { $in: postIds } }), // Supprime les comments de tous les posts lié au blog
       this.postModel.deleteMany({ blog: blogId }),
       this.blogModel.deleteOne({ _id: blogId }),
     ]);
-
     return blog;
   }
 }

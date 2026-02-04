@@ -25,7 +25,7 @@ export class PaginatedQueryDto {
   @ApiProperty({ enum: SortDirection, required: false, default: 'DESC' })
   @IsEnum(SortDirection)
   @IsOptional()
-  sortDirection: SortDirection = SortDirection.DESC; //par default : + petit au + grand
+  sortDirection: SortDirection = SortDirection.DESC;
 
   @ApiProperty({ type: String, required: false, default: '_id' })
   @IsOptional()
@@ -33,7 +33,6 @@ export class PaginatedQueryDto {
   sortBy: string = '_id'; //par default tri par id
 
   //PROPRIÉTÉS CALCULÉES (GETTERS)
-
   protected get MongoDbSortDirection(): 1 | -1 {
     return this.sortDirection === SortDirection.ASC ? 1 : -1; // comparaison entre la requete user et enum de tri
   }
