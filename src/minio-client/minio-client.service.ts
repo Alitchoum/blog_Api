@@ -20,6 +20,29 @@ export class MinioClientService {
       accessKey: this.configService.get('MINIO_USER'),
       secretKey: this.configService.get('MINIO_PASSWORD'),
     });
+    this.setBucketPolicy();
+  }
+
+  private async setBucketPolicy() {
+    const policy = {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Sid: 'PublicAccess',
+          Effect: 'Allow', // On autorise
+          Principal: { AWS: ['*'] }, // Tout le monde (anonyme inclus)
+          Action: ['s3:GetObject'], // Droit de lecture seule
+          Resource: [
+            `arn:aws:s3:::${this.bucketName}/public/*`, // CIBLE: Uniquement le dossier public
+          ],
+        },
+      ],
+    };
+
+    await this.minioClient.setBucketPolicy(
+      this.bucketName,
+      JSON.stringify(policy),
+    );
   }
 
   // Sauvegarder image
@@ -29,6 +52,9 @@ export class MinioClientService {
       key,
       image.buffer,
       image.size,
+      {
+        'Content-Type': image.mimetype || 'application/octet-stream',
+      },
     );
   }
 
@@ -42,10 +68,7 @@ export class MinioClientService {
   }
 
   // Supprimer image
-  async deleteFile(fileName: string) {
-    const name = fileName.split('/').pop();
-    if (name) {
-      await this.minioClient.removeObject(this.bucketName, name);
-    }
+  async deleteImage(key: string) {
+    await this.minioClient.removeObject(this.bucketName, key);
   }
 }

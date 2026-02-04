@@ -92,9 +92,9 @@ export class PostsService {
     if (post.images) {
       //add ici methode suppression image uploadService
     }
-    //supprimer tous les commentaires associés au post (autres users)
+    //supprime tous les commentaires associés au post (incluant les autres users)
     await this.commentModel.deleteMany({ post: postId });
-    //supprimer le post
+    //supprime le post
     await this.postModel.deleteOne({ _id: postId });
   }
 }

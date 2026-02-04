@@ -7,6 +7,7 @@ import { UsersModule } from '../users/users.module';
 import { AuthModule } from '../auth/auth.module';
 import { CommentMapper } from './comment.mapper';
 import { PostsModule } from '../posts/posts.module';
+import { CommentsRepository } from './comments.repository';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { PostsModule } from '../posts/posts.module';
     PostsModule,
   ],
   controllers: [CommentsController],
-  providers: [CommentsService, CommentMapper],
+  providers: [CommentsService, CommentMapper, CommentsRepository],
   exports: [CommentMapper],
 })
 export class CommentsModule {}

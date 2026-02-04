@@ -15,26 +15,26 @@ export class UsersRepository {
     return this.userModel.find().exec();
   }
 
-  async findUserById(id: string): Promise<UserDocument> {
+  async findUserById(userId: string): Promise<UserDocument> {
     return this.userModel
-      .findById(id)
+      .findById(userId)
       .orFail(new NotFoundException('user not found'))
       .exec();
   }
 
   async updateUser(
-    id: string,
+    userId: string,
     updateData: Partial<User>,
   ): Promise<UserDocument> {
     return this.userModel
-      .findByIdAndUpdate(id, updateData, { new: true })
+      .findByIdAndUpdate(userId, updateData, { new: true })
       .orFail(new NotFoundException('user not found'))
       .exec();
   }
 
-  async deleteUser(id: string): Promise<UserDocument> {
+  async deleteUser(userId: string): Promise<UserDocument> {
     return this.userModel
-      .findByIdAndDelete(id)
+      .findByIdAndDelete(userId)
       .orFail(new NotFoundException('user not found'))
       .exec();
   }

@@ -14,13 +14,13 @@ export class CreatePostDto {
   @MaxLength(1000)
   content: string;
 
-  @ApiPropertyOptional({ type: String })
+  @ApiPropertyOptional({ type: [String] })
   @Optional()
   @IsArray()
   @IsString({ each: true })
   images?: string[];
 
-  @ApiPropertyOptional({ type: String })
+  @ApiPropertyOptional({ type: [String] })
   @Optional()
   @IsArray()
   @IsString({ each: true })
