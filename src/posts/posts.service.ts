@@ -1,5 +1,7 @@
 import {
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -11,15 +13,16 @@ import { Post, PostDocument } from './post.schema';
 import { GetPostDto } from './dto/response/get-post.dto';
 import { BlogsService } from '../blogs/blogs.service';
 import { PostMapper } from './post.mapper';
-import { Comment, CommentDocument } from '../comments/comments.schema';
+import { CommentsService } from '../comments/comments.service';
+import { PostsRepository } from './posts.repository';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
-    @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
     private readonly blogsService: BlogsService,
     private readonly postMapper: PostMapper,
+    private readonly postsRepository: PostsRepository,
   ) {}
 
   async createPost(dto: CreatePostDto, userId: string): Promise<GetPostDto> {
@@ -44,20 +47,12 @@ export class PostsService {
   }
 
   async findAllPosts(): Promise<GetPostDto[]> {
-    const posts = await this.postModel
-      .find()
-      .populate(['user', 'blog'])
-      .orFail(new NotFoundException('No found posts'))
-      .exec();
+    const posts = await this.postsRepository.findAllPosts();
     return posts.map((post) => this.postMapper.toPostDto(post));
   }
 
   async findByPostId(postId: string) {
-    const post = await this.postModel
-      .findById(postId)
-      .populate(['user', 'blog'])
-      .orFail(new NotFoundException('Post not found'))
-      .exec();
+    const post = await this.postsRepository.findByPostId(postId);
     return this.postMapper.toPostDto(post);
   }
 
@@ -66,35 +61,19 @@ export class PostsService {
     userId: string,
     updateData: UpdatePostDto,
   ): Promise<GetPostDto> {
-    const updatedPost = await this.postModel
-      .findOneAndUpdate(
-        { _id: postId, user: userId },
-        { $set: updateData },
-        {
-          new: true,
-        },
-      )
-      .orFail(new NotFoundException('Post not found'))
-      .populate('user')
-      .populate({ path: 'blog', populate: { path: 'user' } })
-      .exec();
+    const updatedPost = await this.postsRepository.updatePost(
+      postId,
+      userId,
+      updateData,
+    );
     return this.postMapper.toPostDto(updatedPost);
   }
 
-  async removePost(postId: string, userId: string) {
-    const post = await this.postModel
-      .findOne({
-        _id: postId,
-        user: userId,
-      })
-      .orFail(new NotFoundException('Post not found'))
-      .exec();
-    if (post.images) {
-      //add ici methode suppression image uploadService
-    }
-    //supprime tous les commentaires associés au post (incluant les autres users)
-    await this.commentModel.deleteMany({ post: postId });
-    //supprime le post
-    await this.postModel.deleteOne({ _id: postId });
+  async removePosts(postIds: string[], userId: string) {
+    await this.postsRepository.removePosts(postIds, userId);
+  }
+
+  async removePostsByBlogId(blogIds: string[]) {
+    await this.postsRepository.removePostsByBlogId(blogIds);
   }
 }

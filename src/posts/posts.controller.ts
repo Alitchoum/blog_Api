@@ -81,6 +81,6 @@ export class PostsController {
     @Param('postId') postId: string,
     @ConnectedUser() user: userSchema.UserDocument,
   ) {
-    return this.postsService.removePost(postId, user.id);
+    return this.postsService.removePosts([postId], user.id);
   }
 }

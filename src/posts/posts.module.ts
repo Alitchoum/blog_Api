@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -8,6 +8,8 @@ import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
 import { PostMapper } from './post.mapper';
 import { Comment, CommentSchema } from '../comments/comments.schema';
+import { CommentsModule } from '../comments/comments.module';
+import { PostsRepository } from './posts.repository';
 
 @Module({
   imports: [
@@ -18,9 +20,10 @@ import { Comment, CommentSchema } from '../comments/comments.schema';
     BlogsModule,
     UsersModule,
     AuthModule,
+    forwardRef(() => CommentsModule),
   ],
   controllers: [PostsController],
-  providers: [PostsService, PostMapper],
+  providers: [PostsService, PostMapper, PostsRepository],
   exports: [PostMapper],
 })
 export class PostsModule {}

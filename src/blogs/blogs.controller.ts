@@ -25,7 +25,8 @@ import { Protect } from '../auth/decorators/protect.decorator';
 import { ConnectedUser } from '../users/connected-user.decorator';
 import * as userSchema from '../users/user.schema';
 import { FormDataRequest } from 'nestjs-form-data';
-import { PaginatedQueryDto } from '../_utils/dtos/paginated-query.dtos';
+import { PaginatedQueryDto } from '../_utils/dtos/request/paginated-query.dtos';
+import { GetBlogPaginatedDto } from './dto/response/get-blog-paginated.dto';
 
 @ApiTags('Blog')
 @Controller('blogs')
@@ -49,10 +50,10 @@ export class BlogsController {
   @Protect()
   @Get()
   @ApiOperation({ summary: 'Get all blogs' })
-  @ApiAcceptedResponse({ type: GetBlogDto })
+  @ApiAcceptedResponse({ type: GetBlogPaginatedDto })
   findAllBlogs(
     @Query() query: PaginatedQueryDto,
-  ): Promise<GetBlogDto[] | null> {
+  ): Promise<GetBlogPaginatedDto> {
     return this.blogsService.findAllBlogs(query);
   }
 

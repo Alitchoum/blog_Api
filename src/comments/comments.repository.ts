@@ -1,6 +1,6 @@
 import { Comment, CommentDocument } from './comments.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { DeleteResult, Model } from 'mongoose';
 import { NotFoundException } from '@nestjs/common';
 import { CreateCommentDto } from './dto/request/create-comment.dto';
 
@@ -24,5 +24,19 @@ export class CommentsRepository {
       .orFail(new NotFoundException('Comment not found'))
       .populate(['user', 'post'])
       .exec();
+  }
+
+  async removeComments(
+    commentIds: string[],
+    userId: string,
+  ): Promise<DeleteResult> {
+    return this.commentModel
+      .deleteMany({ _id: { $in: commentIds }, user: userId })
+      .exec();
+  }
+
+  //DELETE CASCADE
+  async removeCommentsByPostIds(postIds: string[]): Promise<DeleteResult> {
+    return this.commentModel.deleteMany({ post: { $in: postIds } }).exec();
   }
 }

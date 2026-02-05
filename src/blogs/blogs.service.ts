@@ -9,9 +9,10 @@ import { BlogMapper } from './blog.mapper';
 import { MinioClientService } from '../minio-client/minio-client.service';
 import { BlogsRepository } from './blogs.repository';
 import { MinioClientMapper } from '../minio-client/minio-client.mapper';
-import { PaginatedQueryDto } from '../_utils/dtos/paginated-query.dtos';
+import { PaginatedQueryDto } from '../_utils/dtos/request/paginated-query.dtos';
 import { Post, PostDocument } from '../posts/post.schema';
 import { Comment, CommentDocument } from '../comments/comments.schema';
+import { GetBlogPaginatedDto } from './dto/response/get-blog-paginated.dto';
 
 @Injectable()
 export class BlogsService {
@@ -50,11 +51,16 @@ export class BlogsService {
   }
 
   //GET ALL BLOG
-  async findAllBlogs(query: PaginatedQueryDto): Promise<GetBlogDto[]> {
+  async findAllBlogs(query: PaginatedQueryDto): Promise<GetBlogPaginatedDto> {
     const blogs = await this.blogsRepository.findAllBlogs(query);
 
+    const total = await this.blogModel.countDocuments().exec(); //natif pour compter nombre d'objets
+
     //Pour attendre le retour de toutes les promesses (async toBlogDto)
-    return Promise.all(blogs.map((blog) => this.blogMapper.toBlogDto(blog)));
+    const blogDtos = await Promise.all(
+      blogs.map((blog) => this.blogMapper.toBlogDto(blog)),
+    );
+    return new GetBlogPaginatedDto(query, total, blogDtos);
   }
 
   //GET BY ID

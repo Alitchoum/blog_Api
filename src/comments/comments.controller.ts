@@ -23,6 +23,7 @@ import { Protect } from '../auth/decorators/protect.decorator';
 import { ConnectedUser } from '../users/connected-user.decorator';
 import * as UserSchema from '../users/user.schema';
 import { GetCommentDto } from './dto/response/get-comment.dto';
+import { DeleteResult } from 'mongoose';
 
 @ApiTags('Comment')
 @Controller('comments')
@@ -77,11 +78,11 @@ export class CommentsController {
   @Protect()
   @Delete(':commentId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete User comment' })
-  removeComment(
+  @ApiOperation({ summary: 'Delete User comment(s)' })
+  removeComments(
     @Param('commentId') commentId: string,
     @ConnectedUser() user: UserSchema.UserDocument,
   ) {
-    return this.commentsService.removeComment(commentId, user.id);
+    return this.commentsService.removeComments([commentId], user.id);
   }
 }

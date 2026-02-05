@@ -1,13 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCommentDto } from './dto/request/create-comment.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { GetCommentDto } from './dto/response/get-comment.dto';
 import { Comment, CommentDocument } from './comments.schema';
 import { CommentMapper } from './comment.mapper';
 import { UpdateCommentDto } from './dto/request/update-comment.dto';
 import { CommentsRepository } from './comments.repository';
-import { BlogDocument } from '../blogs/blog.schema';
 
 @Injectable()
 export class CommentsService {
@@ -64,10 +63,11 @@ export class CommentsService {
     return this.commentMapper.toCommentDto(updatedComment);
   }
 
-  async removeComment(commentId: string, userID: string) {
-    return await this.commentModel
-      .findOneAndDelete({ _id: commentId, user: userID })
-      .orFail(new NotFoundException('Post not found'))
-      .exec();
+  async removeComments(commentIds: string[], userId: string) {
+    await this.commentsRepository.removeComments(commentIds, userId);
+  }
+
+  async removeCommentsByPostIds(postIds: string[]) {
+    await this.commentsRepository.removeCommentsByPostIds(postIds);
   }
 }
