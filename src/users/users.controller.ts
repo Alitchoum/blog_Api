@@ -76,7 +76,7 @@ export class UsersController {
   //DELETE USER BY ID
   @Protect()
   @Delete(':userId')
-  @ApiOperation({ summary: 'Delete user by id' })
+  @ApiOperation({ summary: 'Delete user(s) by id' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiAcceptedResponse()
   deleteUser(@Param('userId') userId: string) {

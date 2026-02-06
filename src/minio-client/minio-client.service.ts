@@ -67,8 +67,8 @@ export class MinioClientService {
     );
   }
 
-  // Supprimer image
-  async deleteImage(key: string) {
-    await this.minioClient.removeObject(this.bucketName, key);
+  // Supprimer image(s)
+  async deleteImages(keys: string[]) {
+    await this.minioClient.removeObjects(this.bucketName, keys);
   }
 }

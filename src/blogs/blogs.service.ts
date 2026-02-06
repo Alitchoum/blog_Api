@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateBlogDto } from './dto/request/create-blog.dto';
 import { UpdateBlogDto } from './dto/request/update-blog.dto';
 import { GetBlogDto } from './dto/response/get-blog.dto';
@@ -10,19 +10,22 @@ import { MinioClientService } from '../minio-client/minio-client.service';
 import { BlogsRepository } from './blogs.repository';
 import { MinioClientMapper } from '../minio-client/minio-client.mapper';
 import { PaginatedQueryDto } from '../_utils/dtos/request/paginated-query.dtos';
-import { Post, PostDocument } from '../posts/post.schema';
-import { Comment, CommentDocument } from '../comments/comments.schema';
 import { GetBlogPaginatedDto } from './dto/response/get-blog-paginated.dto';
+import { PostsService } from '../posts/posts.service';
 
 @Injectable()
 export class BlogsService {
   constructor(
     @InjectModel(Blog.name) private readonly blogModel: Model<BlogDocument>,
-    @InjectModel(Post.name) private postModel: Model<PostDocument>,
-    @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
     private readonly blogMapper: BlogMapper,
+
+    @Inject(forwardRef(() => BlogsRepository))
     private readonly blogsRepository: BlogsRepository,
+
     private readonly minioClientService: MinioClientService,
+
+    @Inject(forwardRef(() => PostsService))
+    private readonly postsService: PostsService,
   ) {}
 
   //CREATE BLOG
@@ -64,9 +67,19 @@ export class BlogsService {
   }
 
   //GET BY ID
-  async findBlogById(blogId: string) {
-    const blog = await this.blogsRepository.findBlogById(blogId);
-    return this.blogMapper.toBlogDto(blog);
+  async findBlogsByIds(blogIds: string[]): Promise<GetBlogDto[]> {
+    const blogs = await this.blogsRepository.findBlogsByIds(blogIds);
+    return await Promise.all(
+      blogs.map((blog) => this.blogMapper.toBlogDto(blog)),
+    );
+  }
+
+  //GET BLOGS BY USER ID
+  async findBlogsByUserId(userId: string): Promise<GetBlogDto[]> {
+    const blogs = await this.blogsRepository.findBlogsByUserId(userId);
+    return await Promise.all(
+      blogs.map((blog) => this.blogMapper.toBlogDto(blog)),
+    );
   }
 
   //UPDATE BLOG
@@ -92,12 +105,18 @@ export class BlogsService {
     return this.blogMapper.toBlogDto(blog);
   }
 
-  //DELETE BLOG
-  async removeBlogById(blogId: string, userId: string) {
-    const blog = await this.blogsRepository.removeBlogById(blogId, userId);
+  //DELETE USER BLOGS
+  async removeBlogs(blogIds: string[], userId: string) {
+    const blogs = await this.blogsRepository.findBlogsByIds(blogIds);
 
-    if (blog.image) {
-      await this.minioClientService.deleteImage(blog.image);
+    const imageKeys = blogs
+      .map((blog) => blog.image)
+      .filter((image): image is string => !!image); //pas tenir compte de undefined /null
+
+    if (imageKeys.length > 0) {
+      await this.minioClientService.deleteImages(imageKeys);
     }
+    await this.postsService.removePostsByBlogId(blogIds);
+    await this.blogsRepository.removeBlogs(blogIds, userId);
   }
 }

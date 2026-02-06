@@ -32,7 +32,7 @@ export class UsersRepository {
       .exec();
   }
 
-  async deleteUser(userId: string): Promise<UserDocument> {
+  async deleteUser(userId: string) {
     return this.userModel
       .findByIdAndDelete(userId)
       .orFail(new NotFoundException('user not found'))

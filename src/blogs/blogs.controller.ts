@@ -58,10 +58,17 @@ export class BlogsController {
   }
 
   @Get(':blogId')
-  @ApiOperation({ summary: 'Get blog by id' })
-  @ApiAcceptedResponse({ type: GetBlogDto })
-  findBlogById(@Param('blogId') blogId: string): Promise<GetBlogDto> {
-    return this.blogsService.findBlogById(blogId);
+  @ApiOperation({ summary: 'Get blog(s) by id' })
+  @ApiAcceptedResponse({ type: [GetBlogDto] })
+  findBlogsByIds(@Param('blogId') blogId: string): Promise<GetBlogDto[]> {
+    return this.blogsService.findBlogsByIds([blogId]);
+  }
+
+  @Get('user/:userId')
+  @ApiOperation({ summary: 'Get blog(s) by user id' })
+  @ApiAcceptedResponse({ type: [GetBlogDto] })
+  findBlogsByUserId(@Param('userId') userId: string): Promise<GetBlogDto[]> {
+    return this.blogsService.findBlogsByUserId(userId);
   }
 
   @Protect()
@@ -86,7 +93,6 @@ export class BlogsController {
     @Param('blogId') blogId: string,
     @ConnectedUser() user: userSchema.UserDocument,
   ) {
-    console.log(blogId);
-    return this.blogsService.removeBlogById(blogId, user.id);
+    return this.blogsService.removeBlogs([blogId], user.id);
   }
 }

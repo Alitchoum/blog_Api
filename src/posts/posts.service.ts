@@ -13,22 +13,27 @@ import { Post, PostDocument } from './post.schema';
 import { GetPostDto } from './dto/response/get-post.dto';
 import { BlogsService } from '../blogs/blogs.service';
 import { PostMapper } from './post.mapper';
-import { CommentsService } from '../comments/comments.service';
 import { PostsRepository } from './posts.repository';
+import { CommentsService } from '../comments/comments.service';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
-    private readonly blogsService: BlogsService,
-    private readonly postMapper: PostMapper,
     private readonly postsRepository: PostsRepository,
+    @Inject(forwardRef(() => BlogsService))
+    private readonly blogsService: BlogsService,
+    @Inject(forwardRef(() => CommentsService))
+    private readonly commentsService: CommentsService,
+    private readonly postMapper: PostMapper,
   ) {}
 
   async createPost(dto: CreatePostDto, userId: string): Promise<GetPostDto> {
-    const blog = await this.blogsService.findBlogById(dto.blogId);
+    const blogs = await this.blogsService.findBlogsByIds([dto.blogId]);
+    const blog = blogs[0];
+
     if (blog.user.id !== userId) {
-      throw new ForbiddenException('Unauthorized access');
+      throw new ForbiddenException('Blog not found');
     }
     const createdPost = await this.postModel.create({
       title: dto.title,
@@ -70,10 +75,15 @@ export class PostsService {
   }
 
   async removePosts(postIds: string[], userId: string) {
+    await this.commentsService.removeCommentsByPostIds(postIds);
     await this.postsRepository.removePosts(postIds, userId);
   }
 
   async removePostsByBlogId(blogIds: string[]) {
-    await this.postsRepository.removePostsByBlogId(blogIds);
+    const posts = await this.postsRepository.findPostsByBlogIds(blogIds);
+    const postIds = posts.map((post) => post._id.toString());
+
+    await this.commentsService.removeCommentsByPostIds(postIds);
+    await this.postsRepository.deletePostsByIds(postIds);
   }
 }

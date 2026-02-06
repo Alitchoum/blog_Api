@@ -15,7 +15,6 @@ import { UserMapper } from '../users/user.mapper';
 export class AuthService {
   constructor(
     private readonly userRepository: UsersRepository,
-    private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly userMapper: UserMapper,
   ) {}

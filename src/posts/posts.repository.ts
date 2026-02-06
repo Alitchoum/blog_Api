@@ -1,18 +1,11 @@
-import { forwardRef, Inject, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post, PostDocument } from './post.schema';
 import { UpdatePostDto } from './dto/request/update-post.dto';
-import { CommentsService } from '../comments/comments.service';
 
 export class PostsRepository {
-  constructor(
-    @InjectModel(Post.name) private postModel: Model<PostDocument>,
-    private readonly commentsService: CommentsService,
-
-    // @Inject(forwardRef(() => CommentsService)) // Pour casser la boucle
-    // private readonly commentsService: CommentsService,
-  ) {}
+  constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>) {}
 
   async findAllPosts(): Promise<PostDocument[]> {
     return await this.postModel
@@ -28,6 +21,10 @@ export class PostsRepository {
       .populate(['user', 'blog'])
       .orFail(new NotFoundException('Post not found'))
       .exec();
+  }
+
+  async findPostsByBlogIds(blogIds: string[]) {
+    return await this.postModel.find({ blog: { $in: blogIds } }).exec();
   }
 
   async updatePost(
@@ -58,17 +55,7 @@ export class PostsRepository {
       .exec();
   }
 
-  async removePostsByBlogId(blogIds: string[]) {
-    const posts = await this.postModel
-      .find({
-        blog: { $in: blogIds },
-      })
-      .orFail(new NotFoundException('Post(s) not found'))
-      .exec();
-
-    const postIds = posts.map((post) => post._id.toString()); //recup IDS post
-
-    await this.commentsService.removeCommentsByPostIds(postIds); //supprime tous les commentaires associés au post (incluant les autres users)
-    await this.postModel.deleteMany({ _id: { $in: postIds } }); //supprime les posts
+  async deletePostsByIds(postIds: string[]) {
+    await this.postModel.deleteMany({ _id: { $in: postIds } }).exec();
   }
 }

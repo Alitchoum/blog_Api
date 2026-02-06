@@ -12,13 +12,12 @@ import { CommentsRepository } from './comments.repository';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
-    UsersModule,
+    forwardRef(() => UsersModule),
     AuthModule,
     forwardRef(() => PostsModule),
-    // PostsModule,
   ],
   controllers: [CommentsController],
   providers: [CommentsService, CommentMapper, CommentsRepository],
-  exports: [CommentMapper, CommentsService],
+  exports: [CommentMapper, CommentsService, CommentsRepository],
 })
 export class CommentsModule {}

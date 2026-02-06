@@ -4,12 +4,14 @@ import { GetUserDto } from './dto/response/get-user.dto';
 import { UsersRepository } from './users.repository';
 import * as bcrypt from 'bcrypt';
 import { UserMapper } from './user.mapper';
+import { BlogsService } from '../blogs/blogs.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly userMapper: UserMapper,
+    private readonly blogsService: BlogsService,
   ) {}
 
   async findAllUser(): Promise<GetUserDto[]> {
@@ -38,6 +40,13 @@ export class UsersService {
   }
 
   async deleteUser(userId: string) {
+    const userBlogs = await this.blogsService.findBlogsByUserId(userId);
+    const blogIds = userBlogs.map((blog) => blog.id);
+
+    //Si user a un ou plusieurs blogs -> cascade
+    if (blogIds.length > 0) {
+      await this.blogsService.removeBlogs(blogIds, userId);
+    }
     return await this.usersRepository.deleteUser(userId);
   }
 }

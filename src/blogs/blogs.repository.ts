@@ -3,16 +3,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Blog, BlogDocument } from './blog.schema';
 import { Model } from 'mongoose';
 import { PaginatedQueryDto } from '../_utils/dtos/request/paginated-query.dtos';
-import { Post, PostDocument } from '../posts/post.schema';
-import { Comment, CommentDocument } from '../comments/comments.schema';
 import { UpdateBlogDto } from './dto/request/update-blog.dto';
+import { PostsService } from '../posts/posts.service';
 
 @Injectable()
 export class BlogsRepository {
   constructor(
     @InjectModel(Blog.name) private readonly blogModel: Model<BlogDocument>,
-    @InjectModel(Post.name) private postModel: Model<PostDocument>,
-    @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
+    private readonly postsService: PostsService,
   ) {}
 
   async createBlog(data: Partial<BlogDocument>): Promise<BlogDocument> {
@@ -32,12 +30,16 @@ export class BlogsRepository {
       .exec();
   }
 
-  findBlogById(blogId: string) {
+  findBlogsByIds(blogIds: string[]): Promise<BlogDocument[]> {
     return this.blogModel
-      .findById(blogId)
+      .find({ _id: { $in: blogIds } })
       .populate('user')
       .orFail(new NotFoundException('No blog found'))
       .exec();
+  }
+
+  findBlogsByUserId(userId: string): Promise<BlogDocument[]> {
+    return this.blogModel.find({ user: userId }).populate('user').exec();
   }
 
   updateBlogById(
@@ -65,22 +67,9 @@ export class BlogsRepository {
       .exec();
   }
 
-  async removeBlogById(blogId: string, userId: string): Promise<BlogDocument> {
-    const blog = await this.blogModel
-      .findOne({ _id: blogId, user: userId })
-      .orFail(new NotFoundException('Blog not found'))
+  async removeBlogs(blogIds: string[], userId: string) {
+    await this.blogModel
+      .deleteMany({ _id: { $in: blogIds }, user: userId })
       .exec();
-
-    const posts = await this.postModel.find({ blog: blogId });
-    const postIds = posts.map((post) => post._id.toString());
-
-    console.log('IDs des posts :', postIds);
-    await Promise.all([
-      this.commentModel.deleteMany({ post: { $in: postIds } }), // Supprime les comments de tous les posts lié au blog
-      this.postModel.deleteMany({ blog: blogId }),
-      this.blogModel.deleteOne({ _id: blogId }),
-    ]);
-
-    return blog;
   }
 }

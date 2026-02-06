@@ -3,11 +3,7 @@ export class MinioClientMapper {
     return `public/blog/${blogId}/${Date.now()}`;
   }
 
-  static CreateImageUrl(key: string) {
-    const endPoint = process.env.MINIO_ENDPOINT;
-    const port = process.env.MINIO_PORT;
-    const bucket = process.env.MINIO_BUCKET;
-
-    return `http://${endPoint}:${port}/${bucket}/${key}`;
-  }
+  // static getPostImageKey(PostId: string): string {
+  //   return `public/post/${PostId}/${Date.now()}`;
+  // }
 }
