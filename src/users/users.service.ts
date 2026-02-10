@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { UpdateUserDto } from './dto/request/update-user.dto';
 import { GetUserDto } from './dto/response/get-user.dto';
 import { UsersRepository } from './users.repository';
 import * as bcrypt from 'bcrypt';
 import { UserMapper } from './user.mapper';
 import { BlogsService } from '../blogs/blogs.service';
+import { CommentsService } from '../comments/comments.service';
 
 @Injectable()
 export class UsersService {
@@ -12,6 +13,8 @@ export class UsersService {
     private readonly usersRepository: UsersRepository,
     private readonly userMapper: UserMapper,
     private readonly blogsService: BlogsService,
+    @Inject(forwardRef(() => CommentsService))
+    private readonly commentsService: CommentsService,
   ) {}
 
   async findAllUser(): Promise<GetUserDto[]> {
@@ -47,6 +50,7 @@ export class UsersService {
     if (blogIds.length > 0) {
       await this.blogsService.removeBlogs(blogIds, userId);
     }
+    await this.commentsService.removeCommentsByUserId(userId);
     return await this.usersRepository.deleteUser(userId);
   }
 }

@@ -35,6 +35,11 @@ export class CommentsRepository {
       .exec();
   }
 
+  //DELETE COMMENTS IN OTHER POST
+  async removeCommentsByUserId(userId: string): Promise<DeleteResult> {
+    return this.commentModel.deleteMany({ user: userId }).exec();
+  }
+
   //DELETE CASCADE
   async removeCommentsByPostIds(postIds: string[]): Promise<DeleteResult> {
     return this.commentModel.deleteMany({ post: { $in: postIds } }).exec();

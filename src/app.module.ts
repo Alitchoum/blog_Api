@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { EnvironmentVariables, validateEnv } from './_utils/config/env.config';
 import { MinioClientModule } from './minio-client/minio-client.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [

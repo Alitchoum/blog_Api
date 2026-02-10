@@ -1,5 +1,5 @@
 import { exit } from 'process';
-import { IsBoolean, IsNumber, IsString, validateSync } from 'class-validator';
+import { IsNumber, IsString, validateSync } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { Logger } from '@nestjs/common';
 
@@ -37,6 +37,9 @@ export class EnvironmentVariables {
 
   @IsString()
   MINIO_BUCKET: string;
+
+  @IsString()
+  DEEPL_API_KEY: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

@@ -9,6 +9,7 @@ import { UsersModule } from '../users/users.module';
 import { PostMapper } from './post.mapper';
 import { CommentsModule } from '../comments/comments.module';
 import { PostsRepository } from './posts.repository';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PostsRepository } from './posts.repository';
     forwardRef(() => UsersModule),
     forwardRef(() => CommentsModule),
     AuthModule,
+    HttpModule,
   ],
   controllers: [PostsController],
   providers: [PostsService, PostMapper, PostsRepository],

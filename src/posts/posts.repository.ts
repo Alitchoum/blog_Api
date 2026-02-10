@@ -3,9 +3,30 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post, PostDocument } from './post.schema';
 import { UpdatePostDto } from './dto/request/update-post.dto';
+import { CreatePostDto } from './dto/request/create-post.dto';
+import { GetPostDto } from './dto/response/get-post.dto';
 
 export class PostsRepository {
   constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>) {}
+
+  async createPost(
+    createPostDto: CreatePostDto,
+    userId: string,
+  ): Promise<PostDocument> {
+    const createdPost = await this.postModel.create({
+      title: createPostDto.title,
+      content: createPostDto.content,
+      images: createPostDto.images,
+      tags: createPostDto.tags,
+      blog: createPostDto.blogId,
+      user: userId,
+    });
+    return await this.postModel
+      .findById(createdPost._id)
+      .populate(['user', 'blog'])
+      .orFail(new NotFoundException('Post not found'))
+      .exec();
+  }
 
   async findAllPosts(): Promise<PostDocument[]> {
     return await this.postModel

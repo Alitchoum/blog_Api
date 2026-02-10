@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCommentDto } from './dto/request/create-comment.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { DeleteResult, Model } from 'mongoose';
 import { GetCommentDto } from './dto/response/get-comment.dto';
 import { Comment, CommentDocument } from './comments.schema';
 import { CommentMapper } from './comment.mapper';
@@ -65,6 +65,10 @@ export class CommentsService {
 
   async removeComments(commentIds: string[], userId: string) {
     await this.commentsRepository.removeComments(commentIds, userId);
+  }
+
+  async removeCommentsByUserId(userId: string) {
+    await this.commentsRepository.removeCommentsByUserId(userId);
   }
 
   async removeCommentsByPostIds(postIds: string[]) {
