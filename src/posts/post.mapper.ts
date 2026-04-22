@@ -21,6 +21,11 @@ export class PostMapper {
       tags: post.tags,
       blog: this.blogMapper.toBlogLigthDto(SafePopulated(post.blog)),
       user: this.userMapper.toUserLightDto(SafePopulated(post.user)),
+      likes: post.likes
+        ? post.likes.map((like) =>
+            this.userMapper.toUserLightDto(SafePopulated(like)),
+          )
+        : [],
     };
   }
   toPostLightDto(post: PostDocument): PostLightDto {

@@ -19,6 +19,7 @@ import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 import { TranslatedPostDto } from './dto/response/translated-post.dto';
+import { EventsRepository } from '../events/events.repository';
 
 @Injectable()
 export class PostsService {
@@ -33,6 +34,7 @@ export class PostsService {
     private readonly commentsService: CommentsService,
     private readonly postMapper: PostMapper,
     private readonly httpService: HttpService,
+    private readonly eventsRepository: EventsRepository,
   ) {}
 
   //CREATE POST
@@ -112,6 +114,16 @@ export class PostsService {
 
     await this.commentsService.removeCommentsByPostIds(postIds);
     await this.postsRepository.deletePostsByIds(postIds);
+  }
+
+  //LIKE POST
+  async addLikePost(postId: string, userId: string) {
+    const likePost = await this.postsRepository.addLikePost(postId, userId);
+
+    //Création d'un event like
+    await this.eventsRepository.createEventLikePost(postId, userId);
+
+    return this.postMapper.toPostDto(likePost);
   }
 
   //TRANSLATE

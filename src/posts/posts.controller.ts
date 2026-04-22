@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   Query,
+  Req,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/request/create-post.dto';
@@ -101,5 +102,16 @@ export class PostsController {
     @Query('lang') lang: string,
   ) {
     return this.postsService.translatePost(title, content, tags, lang);
+  }
+
+  @Protect()
+  @Post(':postId/like')
+  @ApiOperation({ summary: 'Add a like to a post' })
+  @ApiOkResponse({ type: GetPostDto })
+  async addLikePost(
+    @Param('postId') postId: string,
+    @ConnectedUser() user: userSchema.UserDocument,
+  ) {
+    return this.postsService.addLikePost(postId, user.id);
   }
 }

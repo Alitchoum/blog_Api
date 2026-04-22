@@ -10,6 +10,7 @@ import { PostMapper } from './post.mapper';
 import { CommentsModule } from '../comments/comments.module';
 import { PostsRepository } from './posts.repository';
 import { HttpModule } from '@nestjs/axios';
+import { EventsModule } from '../events/event.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { HttpModule } from '@nestjs/axios';
     forwardRef(() => CommentsModule),
     AuthModule,
     HttpModule,
+    EventsModule,
   ],
   controllers: [PostsController],
   providers: [PostsService, PostMapper, PostsRepository],

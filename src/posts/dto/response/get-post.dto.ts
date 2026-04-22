@@ -37,4 +37,7 @@ export class GetPostDto {
 
   @ApiProperty({ required: true, type: GetUserLightDto })
   user: GetUserLightDto;
+
+  @ApiProperty({ type: GetUserLightDto })
+  likes: GetUserLightDto[];
 }

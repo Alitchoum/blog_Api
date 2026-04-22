@@ -24,6 +24,9 @@ export class Post {
 
   @Prop({ type: Types.ObjectId, ref: User.name })
   user: Types.ObjectId | UserDocument;
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }] })
+  likes: Types.ObjectId[] | UserDocument[];
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

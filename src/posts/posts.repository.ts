@@ -4,7 +4,6 @@ import { Model } from 'mongoose';
 import { Post, PostDocument } from './post.schema';
 import { UpdatePostDto } from './dto/request/update-post.dto';
 import { CreatePostDto } from './dto/request/create-post.dto';
-import { GetPostDto } from './dto/response/get-post.dto';
 
 export class PostsRepository {
   constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>) {}
@@ -23,7 +22,7 @@ export class PostsRepository {
     });
     return await this.postModel
       .findById(createdPost._id)
-      .populate(['user', 'blog'])
+      .populate(['user', 'blog', 'likes'])
       .orFail(new NotFoundException('Post not found'))
       .exec();
   }
@@ -31,7 +30,7 @@ export class PostsRepository {
   async findAllPosts(): Promise<PostDocument[]> {
     return await this.postModel
       .find()
-      .populate(['user', 'blog'])
+      .populate(['user', 'blog', 'likes'])
       .orFail(new NotFoundException('No found posts'))
       .exec();
   }
@@ -39,7 +38,7 @@ export class PostsRepository {
   async findByPostId(postId: string) {
     return await this.postModel
       .findById(postId)
-      .populate(['user', 'blog'])
+      .populate(['user', 'blog', 'likes'])
       .orFail(new NotFoundException('Post not found'))
       .exec();
   }
@@ -62,7 +61,7 @@ export class PostsRepository {
         },
       )
       .orFail(new NotFoundException('Post not found'))
-      .populate('user')
+      .populate(['user', 'likes'])
       .populate({ path: 'blog', populate: { path: 'user' } })
       .exec();
   }
@@ -78,5 +77,18 @@ export class PostsRepository {
 
   async deletePostsByIds(postIds: string[]) {
     await this.postModel.deleteMany({ _id: { $in: postIds } }).exec();
+  }
+
+  async addLikePost(postId: string, userId: string) {
+    return await this.postModel
+      .findByIdAndUpdate(
+        postId,
+        { $addToSet: { likes: userId } },
+        { returnDocument: 'after' },
+      )
+      .orFail(new NotFoundException('Post not found'))
+      .populate(['user', 'likes'])
+      .populate({ path: 'blog', populate: { path: 'user' } })
+      .exec();
   }
 }
