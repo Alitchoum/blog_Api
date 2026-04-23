@@ -1,7 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { EventsService } from './events-service';
-import { GetEventDto } from './_utils/dto/response/get-event.dto';
+import { FilteredEventQueryDto } from './_utils/dto/request/filtered-event-query.dto';
+import { GetIncidentPaginatedDto } from './_utils/dto/get-events-paginated.dto';
 
 @ApiTags('Events')
 @Controller('events')
@@ -9,8 +10,10 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get events' })
-  getEvents(): Promise<GetEventDto[]> {
-    return this.eventsService.getEvents();
+  @ApiOperation({ summary: 'Get filtered events' })
+  getEvents(
+    @Query() query: FilteredEventQueryDto,
+  ): Promise<GetIncidentPaginatedDto> {
+    return this.eventsService.getEvents(query);
   }
 }
