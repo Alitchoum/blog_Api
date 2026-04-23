@@ -1,9 +1,15 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommentPost, CommentPostSchema } from './comment-post.schema';
 import { LikePost, LikePostSchema } from './like-post.schema';
 import { EventSchema } from './event.schema';
 import { EventsRepository } from './events.repository';
+import { EventsService } from './events-service';
+import { EventsMapper } from './events-mapper';
+import { UsersModule } from '../users/users.module';
+import { AuthModule } from '../auth/auth.module';
+import { PostsModule } from '../posts/posts.module';
+import { EventsController } from './events-controller';
 
 @Module({
   imports: [
@@ -17,8 +23,12 @@ import { EventsRepository } from './events.repository';
         ],
       },
     ]),
+    forwardRef(() => UsersModule),
+    AuthModule,
+    forwardRef(() => PostsModule),
   ],
-  providers: [EventsRepository],
+  controllers: [EventsController],
+  providers: [EventsService, EventsRepository, EventsMapper],
   exports: [EventsRepository],
 })
 export class EventsModule {}

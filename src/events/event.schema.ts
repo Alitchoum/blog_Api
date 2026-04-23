@@ -15,6 +15,3 @@ export class Event {
   createdAt: Date;
 }
 export const EventSchema = SchemaFactory.createForClass(Event);
-
-//   @Prop({ type: Types.ObjectId, ref: User.name })
-//   targetUser: Types.ObjectId | UserDocument;

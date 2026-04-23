@@ -9,10 +9,10 @@ export class LikePost {
   kind: string;
   createdAt: Date;
 
-  @Prop({ type: Types.ObjectId, ref: Post.name })
+  @Prop({ type: Types.ObjectId, ref: 'Post' })
   post: Types.ObjectId | PostDocument;
 
-  @Prop({ type: Types.ObjectId, ref: User.name })
+  @Prop({ type: Types.ObjectId, ref: 'User' })
   userLike: Types.ObjectId | UserDocument;
 }
 

@@ -8,10 +8,10 @@ export class CommentPost {
   kind: string;
   createdAt: Date;
 
-  @Prop({ type: Types.ObjectId, ref: Post.name })
+  @Prop({ type: Types.ObjectId, ref: 'Post' })
   post: Types.ObjectId | PostDocument;
 
-  @Prop({ type: Types.ObjectId, ref: User.name })
+  @Prop({ type: Types.ObjectId, ref: 'User' })
   userComment: Types.ObjectId | UserDocument;
 }
 

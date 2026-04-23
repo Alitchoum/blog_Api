@@ -23,7 +23,6 @@ import { Protect } from '../auth/decorators/protect.decorator';
 import { ConnectedUser } from '../users/connected-user.decorator';
 import * as UserSchema from '../users/user.schema';
 import { GetCommentDto } from './dto/response/get-comment.dto';
-import { DeleteResult } from 'mongoose';
 
 @ApiTags('Comment')
 @Controller('comments')

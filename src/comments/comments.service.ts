@@ -7,6 +7,7 @@ import { Comment, CommentDocument } from './comments.schema';
 import { CommentMapper } from './comment.mapper';
 import { UpdateCommentDto } from './dto/request/update-comment.dto';
 import { CommentsRepository } from './comments.repository';
+import { EventsRepository } from '../events/events.repository';
 
 @Injectable()
 export class CommentsService {
@@ -14,6 +15,7 @@ export class CommentsService {
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
     private readonly commentMapper: CommentMapper,
     private readonly commentsRepository: CommentsRepository,
+    private readonly eventsRepository: EventsRepository,
   ) {}
 
   async createComment(
@@ -22,6 +24,12 @@ export class CommentsService {
   ): Promise<GetCommentDto> {
     const comment = await this.commentsRepository.createComment(
       createCommentDto,
+      userId,
+    );
+
+    //Add event comment post
+    await this.eventsRepository.createEventCommentPost(
+      comment.post.id.toString(),
       userId,
     );
     return this.commentMapper.toCommentDto(comment);
