@@ -1,8 +1,8 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CommentPost, CommentPostSchema } from './comment-post.schema';
-import { LikePost, LikePostSchema } from './like-post.schema';
-import { EventSchema } from './event.schema';
+import { CommentPost, CommentPostSchema } from './schemas/comment-post.schema';
+import { LikePost, LikePostSchema } from './schemas/like-post.schema';
+import { EventSchema } from './schemas/event.schema';
 import { EventsRepository } from './events.repository';
 import { EventsService } from './events-service';
 import { EventsMapper } from './events-mapper';

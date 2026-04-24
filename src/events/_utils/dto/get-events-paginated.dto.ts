@@ -1,14 +1,27 @@
 import { PaginationDto } from '../../../_utils/dtos/response/pagination.dto';
-import { GetEventDto } from './response/get-event.dto';
 import { PaginatedQueryDto } from '../../../_utils/dtos/request/paginated-query.dtos';
+import { GetEventUserCommentDto } from './response/get-event-user-comment.dto';
+import { GetEventUserLikeDto } from './response/get-event-user-like.dto';
+import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 
-export class GetIncidentPaginatedDto extends PaginationDto {
-  items: GetEventDto[];
+export type GetEventUnionDto = GetEventUserCommentDto | GetEventUserLikeDto;
+
+export class GetEventsPaginatedDto extends PaginationDto {
+  @ApiProperty({
+    type: 'array',
+    items: {
+      oneOf: [
+        { $ref: getSchemaPath(GetEventUserLikeDto) },
+        { $ref: getSchemaPath(GetEventUserCommentDto) },
+      ],
+    },
+  })
+  items: GetEventUnionDto[];
 
   constructor(
     paginatedQuery: PaginatedQueryDto,
     totalItemsCount: number,
-    items: GetEventDto[],
+    items: GetEventUnionDto[],
   ) {
     super(paginatedQuery, totalItemsCount);
     this.items = items;
