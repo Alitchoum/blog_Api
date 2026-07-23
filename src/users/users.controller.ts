@@ -33,7 +33,7 @@ export class UsersController {
 
   //GET USER PROFIL (TOKEN)
   @Protect()
-  @Get('profile')
+  @Get('me')
   @ApiOperation({ summary: 'Load protected profile' })
   getProfile(@ConnectedUser() user: userSchema.UserDocument): GetUserDto {
     return this.userMapper.toUserDto(user);

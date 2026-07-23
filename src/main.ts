@@ -15,6 +15,13 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
+
+  app.enableCors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
+  });
+
   app.register(multipart);
   const config = new DocumentBuilder()
     .setTitle('Blog API')
@@ -27,7 +34,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   const configService = app.get(ConfigService<EnvironmentVariables, true>);
+  app.setGlobalPrefix('api');
   return app.listen(configService.get('PORT'));
-  //await app.listen(process.env.PORT ?? 3000);
 }
 void bootstrap();

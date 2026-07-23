@@ -8,7 +8,6 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../users/dto/request/create-user.dto';
 import { RegisterDto } from './dto/register.dto';
-import { UsersService } from '../users/users.service';
 import { UserMapper } from '../users/user.mapper';
 
 @Injectable()
