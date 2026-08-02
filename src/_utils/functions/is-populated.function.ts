@@ -19,16 +19,6 @@ export function IsPopulatedOrFail<T>(
   return true;
 }
 
-// export function SafePopulated<T>(
-//   document: T | Types.ObjectId | string | null,
-// ): T {
-//   IsPopulatedOrFail(document);
-//   return document as T;
-// }
-
-
-
-
 export function SafePopulated<T>(
   document: T | Types.ObjectId | string | null,
 ): T {

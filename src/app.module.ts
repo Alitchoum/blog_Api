@@ -10,6 +10,7 @@ import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { EnvironmentVariables, validateEnv } from './_utils/config/env.config';
 import { MinioClientModule } from './minio-client/minio-client.module';
 import { HttpModule } from '@nestjs/axios';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -28,26 +29,25 @@ import { HttpModule } from '@nestjs/axios';
       }),
     }),
 
-    NestjsFormDataModule.configAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        storage: MemoryStoredFile, //petits fichiers (legers)
-        isGlobal: true,
-        cleanupAfterSuccessHandle: true,
-        cleanupAfterFailedHandle: true,
-        limits: {
-          files: configService.get('UPLOAD_MAX_FILES'),
-          fileSize: configService.get('UPLOAD_MAX_FILES_SIZE_MB') * 1024 * 1024,
-        },
-      }),
+    NestjsFormDataModule.config({
+      isGlobal: true,
+      storage: MemoryStoredFile, // fichiers légers stockés en mémoire
+      cleanupAfterSuccessHandle: true,
+      cleanupAfterFailedHandle: true,
+      limits: {
+        files: Number(process.env.UPLOAD_MAX_FILES) || 5,
+        fileSize:
+          (Number(process.env.UPLOAD_MAX_FILES_SIZE_MB) || 10) * 1024 * 1024,
+      },
     }),
+
     UsersModule,
     BlogsModule,
     PostsModule,
     CommentsModule,
     AuthModule,
     MinioClientModule,
+    CategoryModule,
   ],
 })
 export class AppModule {}

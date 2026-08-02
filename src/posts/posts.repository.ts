@@ -1,49 +1,74 @@
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post, PostDocument } from './post.schema';
 import { UpdatePostDto } from './dto/request/update-post.dto';
-import { CreatePostDto } from './dto/request/create-post.dto';
 
+export interface CreatePostData {
+  title: string;
+  content: string;
+  blogId: string;
+  tags?: string[];
+  images?: string[]; // URLs sous forme de string[]
+}
+
+@Injectable()
 export class PostsRepository {
   constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>) {}
 
   async createPost(
-    createPostDto: CreatePostDto,
+    data: CreatePostData,
     userId: string,
   ): Promise<PostDocument> {
     const createdPost = await this.postModel.create({
-      title: createPostDto.title,
-      content: createPostDto.content,
-      images: createPostDto.images,
-      tags: createPostDto.tags,
-      blog: createPostDto.blogId,
+      title: data.title,
+      content: data.content,
+      images: data.images ?? [],
+      tags: data.tags ?? [],
+      blog: data.blogId,
       user: userId,
     });
-    return await this.postModel
-      .findById(createdPost._id)
-      .populate(['user', 'blog', 'likes'])
-      .orFail(new NotFoundException('Post not found'))
-      .exec();
+
+    return await createdPost.populate([
+      { path: 'blog', populate: { path: 'user' } },
+      { path: 'user' },
+    ]);
   }
 
   async findAllPosts(): Promise<PostDocument[]> {
     return await this.postModel
       .find()
-      .populate(['user', 'blog', 'likes'])
-      .orFail(new NotFoundException('No found posts'))
+      .populate([
+        { path: 'blog', populate: { path: 'user' } },
+        { path: 'user' },
+      ])
       .exec();
   }
 
-  async findByPostId(postId: string) {
+  async findByPostId(postId: string): Promise<PostDocument> {
     return await this.postModel
       .findById(postId)
-      .populate(['user', 'blog', 'likes'])
       .orFail(new NotFoundException('Post not found'))
+      .populate([
+        { path: 'blog', populate: { path: 'user' } },
+        { path: 'user' },
+      ])
       .exec();
   }
 
-  async findPostsByBlogIds(blogIds: string[]) {
+  async findPostsByIds(postIds: string[]): Promise<PostDocument[]> {
+    return await this.postModel
+      .find({
+        _id: { $in: postIds },
+      })
+      .populate([
+        { path: 'blog', populate: { path: 'user' } },
+        { path: 'user' },
+      ])
+      .exec();
+  }
+
+  async findPostsByBlogIds(blogIds: string[]): Promise<PostDocument[]> {
     return await this.postModel.find({ blog: { $in: blogIds } }).exec();
   }
 
@@ -56,17 +81,17 @@ export class PostsRepository {
       .findOneAndUpdate(
         { _id: postId, user: userId },
         { $set: updateData },
-        {
-          new: true,
-        },
+        { new: true },
       )
       .orFail(new NotFoundException('Post not found'))
-      .populate(['user', 'likes'])
-      .populate({ path: 'blog', populate: { path: 'user' } })
+      .populate([
+        { path: 'blog', populate: { path: 'user' } },
+        { path: 'user' },
+      ])
       .exec();
   }
 
-  async removePosts(postIds: string[], userId: string) {
+  async removePosts(postIds: string[], userId: string): Promise<void> {
     await this.postModel
       .deleteMany({
         _id: { $in: postIds },
@@ -75,20 +100,17 @@ export class PostsRepository {
       .exec();
   }
 
-  async deletePostsByIds(postIds: string[]) {
+  async deletePostsByIds(postIds: string[]): Promise<void> {
     await this.postModel.deleteMany({ _id: { $in: postIds } }).exec();
   }
 
-  async addLikePost(postId: string, userId: string) {
+  async findPostByBlogId(blogId: string): Promise<PostDocument[]> {
     return await this.postModel
-      .findByIdAndUpdate(
-        postId,
-        { $addToSet: { likes: userId } },
-        { returnDocument: 'after' },
-      )
-      .orFail(new NotFoundException('Post not found'))
-      .populate(['user', 'likes'])
-      .populate({ path: 'blog', populate: { path: 'user' } })
+      .find({ blog: blogId })
+      .populate([
+        { path: 'blog', populate: { path: 'user' } },
+        { path: 'user' },
+      ])
       .exec();
   }
 }

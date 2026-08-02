@@ -9,13 +9,13 @@ import {
   HttpCode,
   HttpStatus,
   Query,
-  Req,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/request/create-post.dto';
 import { UpdatePostDto } from './dto/request/update-post.dto';
 import {
   ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -26,6 +26,7 @@ import { Protect } from '../auth/decorators/protect.decorator';
 import { ConnectedUser } from '../users/connected-user.decorator';
 import * as userSchema from '../users/user.schema';
 import { GetPostDto } from './dto/response/get-post.dto';
+import { FormDataRequest, MemoryStoredFile } from 'nestjs-form-data';
 
 @ApiTags('Post')
 @Controller('posts')
@@ -35,6 +36,8 @@ export class PostsController {
   //CREATE
   @Protect()
   @Post()
+  @FormDataRequest({ storage: MemoryStoredFile })
+  @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreatePostDto })
   @ApiCreatedResponse({
     type: GetPostDto,
@@ -45,7 +48,7 @@ export class PostsController {
     @Body() dto: CreatePostDto,
     @ConnectedUser() user: userSchema.UserDocument,
   ) {
-    return this.postsService.createPost(dto, user.id);
+    return this.postsService.createPost(dto, user.id, dto.images);
   }
 
   //GET ALL
@@ -65,6 +68,15 @@ export class PostsController {
   @ApiQuery({ name: 'lang' })
   findPostById(@Param('postId') postId: string, @Query('lang') lang?: string) {
     return this.postsService.findByPostId(postId, lang);
+  }
+
+  //GET BY BLOG ID
+  @Protect()
+  @Get('blog/:blogId')
+  @ApiOkResponse({ type: GetPostDto })
+  @ApiOperation({ summary: 'Get post by blog id' })
+  findPostByBlogId(@Param('blogId') blogId: string) {
+    return this.postsService.findPostByBlogId(blogId);
   }
 
   //UPDATE

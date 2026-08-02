@@ -12,6 +12,7 @@ import { MinioClientMapper } from '../minio-client/minio-client.mapper';
 import { PaginatedQueryDto } from '../_utils/dtos/request/paginated-query.dtos';
 import { GetBlogPaginatedDto } from './dto/response/get-blog-paginated.dto';
 import { PostsService } from '../posts/posts.service';
+import { searchQueryBlogDto } from './dto/request/search-query-blog.dto';
 
 @Injectable()
 export class BlogsService {
@@ -33,7 +34,7 @@ export class BlogsService {
     dto: CreateBlogDto,
     userId: Types.ObjectId,
   ): Promise<GetBlogDto> {
-    const blogId = new Types.ObjectId(); //genere un id pour blog
+    const blogId = new Types.ObjectId();
     let key: string | undefined;
 
     if (dto.image) {
@@ -46,6 +47,7 @@ export class BlogsService {
       title: dto.title,
       description: dto.description,
       image: key,
+      category: new Types.ObjectId(dto.category),
       user: userId,
     };
 
@@ -54,10 +56,11 @@ export class BlogsService {
   }
 
   //GET ALL BLOG
-  async findAllBlogs(query: PaginatedQueryDto): Promise<GetBlogPaginatedDto> {
-    const blogs = await this.blogsRepository.findAllBlogs(query);
+  async findAllBlogs(query: searchQueryBlogDto): Promise<GetBlogPaginatedDto> {
+    const filter = query.toFilteredBlog;
+    const blogs = await this.blogsRepository.findAllBlogs(query, filter);
 
-    const total = await this.blogModel.countDocuments().exec(); //natif pour compter nombre d'objets
+    const total = await this.blogModel.countDocuments(filter).exec();
 
     //Pour attendre le retour de toutes les promesses (async toBlogDto)
     const blogDtos = await Promise.all(

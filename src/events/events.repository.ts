@@ -23,11 +23,16 @@ export class EventsRepository {
     } as any);
   }
 
-  async createEventCommentPost(postId: string, userId: string) {
+  async createEventCommentPost(
+    postId: string,
+    userId: string,
+    content: string,
+  ) {
     return await this.commentModel.create({
       createdAt: new Date(),
       post: postId,
       userComment: userId,
+      content: content,
     } as any);
   }
 

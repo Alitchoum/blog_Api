@@ -23,6 +23,12 @@ export class MinioClientService {
     this.setBucketPolicy();
   }
 
+  getPublicUrl(key: string): string {
+    const endpoint = this.configService.get('MINIO_ENDPOINT');
+    const port = this.configService.get('MINIO_PORT');
+    return `http://${endpoint}:${port}/${this.bucketName}/${key}`;
+  }
+
   private async setBucketPolicy() {
     const policy = {
       Version: '2012-10-17',
@@ -32,9 +38,7 @@ export class MinioClientService {
           Effect: 'Allow', // On autorise
           Principal: { AWS: ['*'] }, // Tout le monde (anonyme inclus)
           Action: ['s3:GetObject'], // Droit de lecture seule
-          Resource: [
-            `arn:aws:s3:::${this.bucketName}/public/*`, // CIBLE: Uniquement le dossier public
-          ],
+          Resource: [`arn:aws:s3:::${this.bucketName}/*`],
         },
       ],
     };
@@ -46,7 +50,7 @@ export class MinioClientService {
   }
 
   // Sauvegarder image
-  async uploadFile(image: MemoryStoredFile, key: string): Promise<void> {
+  async uploadFile(image: MemoryStoredFile, key: string): Promise<string> {
     await this.minioClient.putObject(
       this.bucketName,
       key,
@@ -56,6 +60,7 @@ export class MinioClientService {
         'Content-Type': image.mimetype || 'application/octet-stream',
       },
     );
+    return this.getPublicUrl(key);
   }
 
   //Rendre public avec une date expiration

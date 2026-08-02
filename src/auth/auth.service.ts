@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -20,6 +21,11 @@ export class AuthService {
 
   //REGISTER
   async register(dto: CreateUserDto): Promise<RegisterDto> {
+    const existingEmail = await this.userRepository.findByEmail(dto.email);
+    if (existingEmail) {
+      throw new ConflictException('email already exists');
+    }
+
     const hashed = await bcrypt.hash(dto.password, 8);
 
     const user = await this.userRepository.createUser({

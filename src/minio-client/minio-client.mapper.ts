@@ -3,7 +3,12 @@ export class MinioClientMapper {
     return `public/blog/${blogId}/${Date.now()}`;
   }
 
-  // static getPostImageKey(PostId: string): string {
-  //   return `public/post/${PostId}/${Date.now()}`;
-  // }
+  static getPostImageKey(postId: string): string {
+    return `public/post/${postId}/${Date.now()}`;
+  }
+
+  static extractKeyFromUrl(url: string): string {
+    const urlParts = url.split('/');
+    return urlParts.slice(4).join('/');
+  }
 }

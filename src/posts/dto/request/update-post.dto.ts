@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsNotEmpty,
@@ -7,6 +7,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { Optional } from 'class-validator-extended';
+import { HasMimeType, IsFile, MemoryStoredFile } from 'nestjs-form-data';
 
 export class UpdatePostDto {
   @ApiPropertyOptional({ type: String })
@@ -22,11 +23,10 @@ export class UpdatePostDto {
   @MaxLength(1000)
   content?: string;
 
-  @ApiPropertyOptional({ type: [String], nullable: true })
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  images?: string[] | null;
+  @IsFile({ each: true })
+  @HasMimeType(['image/jpeg', 'image/png', 'image/webp'], { each: true })
+  images?: MemoryStoredFile[];
 
   @ApiPropertyOptional({ type: [String], nullable: true })
   @IsOptional()

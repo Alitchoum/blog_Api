@@ -5,7 +5,7 @@ import { User, UserDocument } from '../users/user.schema';
 
 export type PostDocument = HydratedDocument<Post>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Post {
   @Prop({ required: true })
   title: string;
@@ -25,8 +25,7 @@ export class Post {
   @Prop({ type: Types.ObjectId, ref: User.name })
   user: Types.ObjectId | UserDocument;
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }] })
-  likes: Types.ObjectId[] | UserDocument[];
+  createdAt: Date;
+  updatedAt: Date;
 }
-
 export const PostSchema = SchemaFactory.createForClass(Post);

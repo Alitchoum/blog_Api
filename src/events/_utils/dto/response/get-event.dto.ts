@@ -24,4 +24,7 @@ export class GetEventDto {
   @ApiProperty({ type: GetUserLightDto })
   @IsNotEmpty()
   user: GetUserLightDto;
+
+  @ApiProperty({ type: String })
+  content: string;
 }

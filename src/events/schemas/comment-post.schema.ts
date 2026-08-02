@@ -13,6 +13,9 @@ export class CommentPost extends Event {
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
   userComment: Types.ObjectId | UserDocument;
+
+  @Prop({ type: String })
+  content: string;
 }
 
 export const CommentPostSchema = SchemaFactory.createForClass(CommentPost);

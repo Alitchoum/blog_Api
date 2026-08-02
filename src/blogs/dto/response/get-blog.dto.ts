@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { GetUserLightDto } from '../../../users/dto/response/get-user-light.dto';
+import { GetCategoryDto } from '../../../category/dto/response/get-category.dto';
 
 export class GetBlogDto {
   @ApiProperty({ required: true, type: String })
@@ -18,10 +19,13 @@ export class GetBlogDto {
   @IsString()
   description: string;
 
-  @ApiPropertyOptional({ type: String, nullable: true })
+  @ApiProperty({ type: String })
   @IsOptional()
   @IsString()
-  image?: string | null;
+  image: string;
+
+  @ApiProperty({ type: GetCategoryDto })
+  category: GetCategoryDto;
 
   @ApiProperty({ type: GetUserLightDto })
   @IsNotEmpty()

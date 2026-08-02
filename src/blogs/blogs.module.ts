@@ -10,6 +10,7 @@ import { BlogsRepository } from './blogs.repository';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { CommentsModule } from '../comments/comments.module';
 import { PostsModule } from '../posts/posts.module';
+import { CategoryModule } from '../category/category.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PostsModule } from '../posts/posts.module';
     NestjsFormDataModule,
     PostsModule,
     CommentsModule,
+    CategoryModule,
   ],
   controllers: [BlogsController],
   providers: [BlogsService, BlogMapper, BlogsRepository],

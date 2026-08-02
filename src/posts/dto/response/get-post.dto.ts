@@ -38,6 +38,12 @@ export class GetPostDto {
   @ApiProperty({ required: true, type: GetUserLightDto })
   user: GetUserLightDto;
 
-  @ApiProperty({ type: GetUserLightDto })
-  likes: GetUserLightDto[];
+  @ApiProperty({ type: 'number' })
+  likesCount: number;
+
+  @ApiProperty({ type: 'number' })
+  commentsCount: number;
+
+  @ApiProperty({ type: String })
+  createdAt: string;
 }

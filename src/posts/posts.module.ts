@@ -11,6 +11,7 @@ import { CommentsModule } from '../comments/comments.module';
 import { PostsRepository } from './posts.repository';
 import { HttpModule } from '@nestjs/axios';
 import { EventsModule } from '../events/event.module';
+import { MinioClientModule } from '../minio-client/minio-client.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { EventsModule } from '../events/event.module';
     AuthModule,
     HttpModule,
     EventsModule,
+    MinioClientModule,
   ],
   controllers: [PostsController],
   providers: [PostsService, PostMapper, PostsRepository],

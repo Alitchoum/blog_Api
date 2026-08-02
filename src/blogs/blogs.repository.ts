@@ -1,31 +1,33 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Blog, BlogDocument } from './blog.schema';
-import { Model } from 'mongoose';
+import { Model, QueryFilter } from 'mongoose';
 import { PaginatedQueryDto } from '../_utils/dtos/request/paginated-query.dtos';
 import { UpdateBlogDto } from './dto/request/update-blog.dto';
-import { PostsService } from '../posts/posts.service';
 
 @Injectable()
 export class BlogsRepository {
   constructor(
     @InjectModel(Blog.name) private readonly blogModel: Model<BlogDocument>,
-    private readonly postsService: PostsService,
   ) {}
 
   async createBlog(data: Partial<BlogDocument>): Promise<BlogDocument> {
     const newBlog = await this.blogModel.create(data);
-    return await newBlog.populate('user');
+    return await newBlog.populate(['user', 'category']);
   }
 
-  async findAllBlogs(query: PaginatedQueryDto): Promise<BlogDocument[]> {
+  async findAllBlogs(
+    query: PaginatedQueryDto,
+    filter: QueryFilter<BlogDocument> = {},
+  ): Promise<BlogDocument[]> {
     return await this.blogModel
-      .find()
+      .find(filter)
       .sort(query.toMongoDbSort)
       .collation({ locale: 'fr', strength: 1 }) // locale: choix langue / strength: ignore la casse
       .skip(query.skip)
       .limit(query.limit)
       .populate('user')
+      .populate('category')
       .orFail(new NotFoundException('no blogs found'))
       .exec();
   }
@@ -34,6 +36,7 @@ export class BlogsRepository {
     return this.blogModel
       .find({ _id: { $in: blogIds } })
       .populate('user')
+      .populate('category')
       .orFail(new NotFoundException('No blog found'))
       .exec();
   }
@@ -64,6 +67,7 @@ export class BlogsRepository {
       )
       .orFail(new NotFoundException('Blog not found'))
       .populate('user')
+      .populate('category')
       .exec();
   }
 

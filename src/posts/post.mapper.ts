@@ -12,7 +12,7 @@ export class PostMapper {
     private readonly blogMapper: BlogMapper,
     private readonly userMapper: UserMapper,
   ) {}
-  toPostDto(post: PostDocument): GetPostDto {
+  toPostDto(post: PostDocument, likesCount = 0, commentsCount = 0): GetPostDto {
     return {
       id: post._id.toString(),
       title: post.title,
@@ -21,11 +21,9 @@ export class PostMapper {
       tags: post.tags,
       blog: this.blogMapper.toBlogLigthDto(SafePopulated(post.blog)),
       user: this.userMapper.toUserLightDto(SafePopulated(post.user)),
-      likes: post.likes
-        ? post.likes.map((like) =>
-            this.userMapper.toUserLightDto(SafePopulated(like)),
-          )
-        : [],
+      likesCount: likesCount,
+      commentsCount: commentsCount,
+      createdAt: post.createdAt.toISOString(),
     };
   }
   toPostLightDto(post: PostDocument): PostLightDto {

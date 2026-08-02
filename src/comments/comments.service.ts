@@ -31,6 +31,7 @@ export class CommentsService {
     await this.eventsRepository.createEventCommentPost(
       comment.post.id.toString(),
       userId,
+      comment.content,
     );
     return this.commentMapper.toCommentDto(comment);
   }

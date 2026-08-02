@@ -27,6 +27,7 @@ import * as userSchema from '../users/user.schema';
 import { FormDataRequest } from 'nestjs-form-data';
 import { PaginatedQueryDto } from '../_utils/dtos/request/paginated-query.dtos';
 import { GetBlogPaginatedDto } from './dto/response/get-blog-paginated.dto';
+import { searchQueryBlogDto } from './dto/request/search-query-blog.dto';
 
 @ApiTags('Blog')
 @Controller('blogs')
@@ -52,7 +53,7 @@ export class BlogsController {
   @ApiOperation({ summary: 'Get all blogs' })
   @ApiAcceptedResponse({ type: GetBlogPaginatedDto })
   findAllBlogs(
-    @Query() query: PaginatedQueryDto,
+    @Query() query: searchQueryBlogDto,
   ): Promise<GetBlogPaginatedDto> {
     return this.blogsService.findAllBlogs(query);
   }

@@ -13,13 +13,16 @@ import { Post, PostDocument } from './post.schema';
 import { GetPostDto } from './dto/response/get-post.dto';
 import { BlogsService } from '../blogs/blogs.service';
 import { PostMapper } from './post.mapper';
-import { PostsRepository } from './posts.repository';
+import { CreatePostData, PostsRepository } from './posts.repository';
 import { CommentsService } from '../comments/comments.service';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 import { TranslatedPostDto } from './dto/response/translated-post.dto';
 import { EventsRepository } from '../events/events.repository';
+import { MinioClientService } from '../minio-client/minio-client.service';
+import { MinioClientMapper } from '../minio-client/minio-client.mapper';
+import { MemoryStoredFile } from 'nestjs-form-data';
 
 @Injectable()
 export class PostsService {
@@ -35,35 +38,81 @@ export class PostsService {
     private readonly postMapper: PostMapper,
     private readonly httpService: HttpService,
     private readonly eventsRepository: EventsRepository,
+    private readonly minioClientService: MinioClientService,
+    private readonly minioClientMapper: MinioClientMapper,
   ) {}
 
-  //CREATE POST
+  // CREATE POST
   async createPost(
     createPostDto: CreatePostDto,
     userId: string,
+    images?: MemoryStoredFile[],
   ): Promise<GetPostDto> {
     const blogs = await this.blogsService.findBlogsByIds([
       createPostDto.blogId,
     ]);
     const blog = blogs[0];
 
-    if (blog.user.id !== userId) {
+    if (blog?.user?.id !== userId) {
       throw new ForbiddenException('Blog not found');
     }
-    const post = await this.postsRepository.createPost(createPostDto, userId);
+
+    const imageUrls: string[] = [];
+
+    if (images && images.length > 0) {
+      for (const image of images) {
+        const key = MinioClientMapper.getPostImageKey(createPostDto.blogId);
+        const publicUrl = await this.minioClientService.uploadFile(image, key);
+        imageUrls.push(publicUrl);
+      }
+    }
+
+    const postData: CreatePostData = {
+      title: createPostDto.title,
+      content: createPostDto.content,
+      blogId: createPostDto.blogId,
+      tags: createPostDto.tags,
+      images: imageUrls,
+    };
+
+    const post = await this.postsRepository.createPost(postData, userId);
     return this.postMapper.toPostDto(post);
   }
 
   //FIND ALL
   async findAllPosts(): Promise<GetPostDto[]> {
     const posts = await this.postsRepository.findAllPosts();
-    return posts.map((post) => this.postMapper.toPostDto(post));
+
+    return Promise.all(
+      posts.map(async (post) => {
+        const likesCount = await this.eventsRepository.countEvents({
+          post: post._id.toString(),
+          kind: 'LikePost',
+        });
+        const commentsCount = await this.eventsRepository.countEvents({
+          post: post._id.toString(),
+          kind: 'CommentPost',
+        });
+        return this.postMapper.toPostDto(post, likesCount, commentsCount);
+      }),
+    );
   }
 
   // FIND POST BY ID
   async findByPostId(postId: string, lang?: string): Promise<GetPostDto> {
     const post = await this.postsRepository.findByPostId(postId);
-    let postDto = await this.postMapper.toPostDto(post);
+
+    // Compteurs
+    const likesCount = await this.eventsRepository.countEvents({
+      post: postId,
+      kind: 'LikePost',
+    });
+    const commentsCount = await this.eventsRepository.countEvents({
+      post: postId,
+      kind: 'CommentPost',
+    });
+
+    let postDto = this.postMapper.toPostDto(post, likesCount, commentsCount);
 
     //Recupere le version traduite
     if (lang) {
@@ -74,7 +123,6 @@ export class PostsService {
         lang,
       );
 
-      //Applique la trad au dto
       postDto = {
         ...postDto,
         title: translatedText.title,
@@ -82,8 +130,6 @@ export class PostsService {
         tags: translatedText.tags,
       };
     }
-
-    console.log(postDto);
     return postDto;
   }
 
@@ -103,6 +149,22 @@ export class PostsService {
 
   //DELETE USER POST(S)
   async removePosts(postIds: string[], userId: string) {
+    // 1. Récupération des posts pour nettoyer leurs images dans MinIO
+    const posts = await this.postsRepository.findPostsByIds(postIds);
+    const imageKeysToDelete: string[] = [];
+
+    posts.forEach((post) => {
+      if (post.images && post.images.length > 0) {
+        post.images.forEach((url) => {
+          imageKeysToDelete.push(MinioClientMapper.extractKeyFromUrl(url));
+        });
+      }
+    });
+
+    if (imageKeysToDelete.length > 0) {
+      await this.minioClientService.deleteImages(imageKeysToDelete);
+    }
+
     await this.commentsService.removeCommentsByPostIds(postIds);
     await this.postsRepository.removePosts(postIds, userId);
   }
@@ -112,18 +174,28 @@ export class PostsService {
     const posts = await this.postsRepository.findPostsByBlogIds(blogIds);
     const postIds = posts.map((post) => post._id.toString());
 
+    // Nettoyage MinIO
+    const imageKeysToDelete: string[] = [];
+    posts.forEach((post) => {
+      if (post.images && post.images.length > 0) {
+        post.images.forEach((url) => {
+          imageKeysToDelete.push(MinioClientMapper.extractKeyFromUrl(url));
+        });
+      }
+    });
+
+    if (imageKeysToDelete.length > 0) {
+      await this.minioClientService.deleteImages(imageKeysToDelete);
+    }
+
     await this.commentsService.removeCommentsByPostIds(postIds);
     await this.postsRepository.deletePostsByIds(postIds);
   }
 
   //LIKE POST
-  async addLikePost(postId: string, userId: string) {
-    const likePost = await this.postsRepository.addLikePost(postId, userId);
-
-    //Création d'un event like
+  async addLikePost(postId: string, userId: string): Promise<GetPostDto> {
     await this.eventsRepository.createEventLikePost(postId, userId);
-
-    return this.postMapper.toPostDto(likePost);
+    return this.findByPostId(postId);
   }
 
   //TRANSLATE
@@ -169,5 +241,10 @@ export class PostsService {
         tags: translations.slice(2),
       };
     }
+  }
+
+  async findPostByBlogId(blogId: string): Promise<GetPostDto[]> {
+    const posts = await this.postsRepository.findPostByBlogId(blogId);
+    return posts.map((post) => this.postMapper.toPostDto(post));
   }
 }
